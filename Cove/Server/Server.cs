@@ -370,7 +370,6 @@ namespace Cove.Server
             {
                 try
                 {
-                    // OnNetworkPacket(packet.Value);
                     for (int i = 0; i < 6; i++)
                     {
                         uint packetSize = 0;

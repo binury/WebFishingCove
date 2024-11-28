@@ -21,9 +21,10 @@ namespace Cove.Server.Chalk
 
         public Dictionary<int, object> getChalkPacket()
         {
+
             Dictionary<int, object> packet = new Dictionary<int, object>();
             ulong i = 0;
-            foreach (KeyValuePair<Vector2, int> entry in chalkImage.ToDictionary(pair => pair.Key, pair => pair.Value))
+            foreach (KeyValuePair<Vector2, int> entry in chalkImage.ToList())
             {
                 Dictionary<int, object> arr = new();
                 arr[0] = entry.Key;
