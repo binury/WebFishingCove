@@ -197,7 +197,16 @@ namespace Cove.Server
             Dictionary<string, object> blacklistPacket = new();
             blacklistPacket["type"] = "force_disconnect_player";
             blacklistPacket["user_id"] = blacklistedSteamID; // gotta be a string
-            sendPacketToPlayers(blacklistPacket);
+
+            CSteamID blockedPlayer = new CSteamID(ulong.Parse(blacklistedSteamID));
+            foreach (WFPlayer player in AllPlayers.ToList())
+            {
+                if (!player.blockedPlayers.Contains(blockedPlayer))
+                {
+                    sendBlacklistPacketToPlayer(blacklistedSteamID, player.SteamId);
+                    player.blockedPlayers.Add(blockedPlayer);
+                }
+            }
         }
 
         // returns the letter id!

@@ -30,7 +30,7 @@ namespace Cove.Server.Actor
         public CSteamID SteamId { get; set; }
         public string FisherID { get; set; }
         public string Username { get; set; }
-
+        public List<CSteamID> blockedPlayers = new List<CSteamID>();
         public WFPlayer(CSteamID id, string fisherName) : base(0, "player", Vector3.zero)
         {
             SteamId = id;
