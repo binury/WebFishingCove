@@ -271,8 +271,11 @@ namespace Cove.Server
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
 
-                    Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has joined the game!");
-                    updatePlayercount();
+                    if (!isPlayerBanned(userChanged))
+                    {
+                        Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has joined the game!");
+                        updatePlayercount();
+                    }
 
                     if (AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID) != null)
                     {
@@ -307,8 +310,11 @@ namespace Cove.Server
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
 
-                    Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has left the game!");
-                    updatePlayercount();
+                    if (!isPlayerBanned(userChanged))
+                    {
+                        Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has left the game!");
+                        updatePlayercount();
+                    }
 
                     WFPlayer leavingPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID);
                     foreach (PluginInstance plugin in loadedPlugins)
