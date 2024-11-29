@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Cove.Server.HostedServices;
 using Microsoft.Extensions.Logging;
 using Vector3 = Cove.GodotFormat.Vector3;
+using System.Reflection;
 
 namespace Cove.Server
 {
@@ -303,7 +304,6 @@ namespace Cove.Server
                         Console.WriteLine("This will cause issues, please run the server on a different account!");
                         Console.ResetColor();
                     }
-
                 }
 
                 if (stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeLeft) || stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeDisconnected))

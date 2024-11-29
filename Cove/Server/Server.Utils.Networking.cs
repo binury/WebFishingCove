@@ -39,7 +39,7 @@ namespace Cove.Server
         {
             byte[] packetBytes = writePacket(packet);
             
-            foreach (CSteamID player in getAllPlayers().ToList())
+            foreach (CSteamID player in getAllPlayers())
             {
                 if (player == SteamUser.GetSteamID())
                     continue;
@@ -56,12 +56,14 @@ namespace Cove.Server
 
         public CSteamID[] getAllPlayers()
         {
-            int playerCount = AllPlayers.Count;
+            WFPlayer[] AllPlayersNow = AllPlayers.ToArray();
+
+            int playerCount = AllPlayersNow.Length;
             CSteamID[] players = new CSteamID[playerCount];
 
             for (int i = 0; i < playerCount; i++)
             {
-                players[i] = AllPlayers[i].SteamId;
+                players[i] = AllPlayersNow[i].SteamId;
             }
 
             return players;
