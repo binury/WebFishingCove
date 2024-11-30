@@ -69,31 +69,32 @@ namespace Cove.Server.HostedServices
 
             try
             {
-
-                foreach (WFActor actor in server.serverOwnedInstances.ToList())
+                lock (server.serverActorListLock)
                 {
-                    actor.onUpdate();
-
-                    if (!pastTransforms.ContainsKey(actor.InstanceID))
+                    foreach (WFActor actor in server.serverOwnedInstances.ToList())
                     {
-                        pastTransforms[actor.InstanceID] = Vector3.zero;
-                    }
+                        actor.onUpdate();
 
-                    if (actor.pos != pastTransforms[actor.InstanceID] || (updateI == idelUpdateCount))
-                    {
+                        if (!pastTransforms.ContainsKey(actor.InstanceID))
+                        {
+                            pastTransforms[actor.InstanceID] = Vector3.zero;
+                        }
 
-                        Dictionary<string, object> packet = new Dictionary<string, object>();
-                        packet["type"] = "actor_update";
-                        packet["actor_id"] = actor.InstanceID;
-                        packet["pos"] = actor.pos;
-                        packet["rot"] = actor.rot;
+                        if (actor.pos != pastTransforms[actor.InstanceID] || (updateI == idelUpdateCount))
+                        {
 
-                        pastTransforms[actor.InstanceID] = actor.pos; // crude
+                            Dictionary<string, object> packet = new Dictionary<string, object>();
+                            packet["type"] = "actor_update";
+                            packet["actor_id"] = actor.InstanceID;
+                            packet["pos"] = actor.pos;
+                            packet["rot"] = actor.rot;
 
-                        server.sendPacketToPlayers(packet);
+                            pastTransforms[actor.InstanceID] = actor.pos; // crude
+
+                            server.sendPacketToPlayers(packet);
+                        }
                     }
                 }
-
             }
             catch (InvalidOperationException e)
             {

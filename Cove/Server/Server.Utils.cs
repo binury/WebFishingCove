@@ -72,7 +72,9 @@ namespace Cove.Server
             RainCloud cloud = new RainCloud(IId, pos);
             cloud.despawn = true;
 
-            serverOwnedInstances.Add(cloud);
+            lock (serverActorListLock)
+                serverOwnedInstances.Add(cloud);
+
             allActors.Add(cloud);
         }
 
@@ -131,7 +133,8 @@ namespace Cove.Server
                 pos = Vector3.zero;
 
             WFActor actor = new WFActor(IId, type, pos);
-            serverOwnedInstances.Add(actor);
+            lock (serverActorListLock)
+                serverOwnedInstances.Add(actor);
             allActors.Add(actor);
 
             instanceSpacePrams["actor_type"] = type;
@@ -159,28 +162,32 @@ namespace Cove.Server
 
             sendPacketToPlayers(removePacket); // remove
 
-            serverOwnedInstances.Remove(instance);
+            lock (serverActorListLock)
+                serverOwnedInstances.Remove(instance);
         }
 
         private void sendPlayerAllServerActors(CSteamID id)
         {
-            foreach (WFActor actor in serverOwnedInstances)
+            lock (serverActorListLock)
             {
-                Dictionary<string, object> spawnPacket = new Dictionary<string, object>();
-                spawnPacket["type"] = "instance_actor";
+                foreach (WFActor actor in serverOwnedInstances)
+                {
+                    Dictionary<string, object> spawnPacket = new Dictionary<string, object>();
+                    spawnPacket["type"] = "instance_actor";
 
-                Dictionary<string, object> instanceSpacePrams = new Dictionary<string, object>();
-                spawnPacket["params"] = instanceSpacePrams;
+                    Dictionary<string, object> instanceSpacePrams = new Dictionary<string, object>();
+                    spawnPacket["params"] = instanceSpacePrams;
 
-                instanceSpacePrams["actor_type"] = actor.Type;
-                instanceSpacePrams["at"] = actor.pos;
-                instanceSpacePrams["rot"] = new Vector3(0, 0, 0);
-                instanceSpacePrams["zone"] = "main_zone";
-                instanceSpacePrams["zone_owner"] = -1;
-                instanceSpacePrams["actor_id"] = actor.InstanceID;
-                instanceSpacePrams["creator_id"] = (long)SteamUser.GetSteamID().m_SteamID;
+                    instanceSpacePrams["actor_type"] = actor.Type;
+                    instanceSpacePrams["at"] = actor.pos;
+                    instanceSpacePrams["rot"] = new Vector3(0, 0, 0);
+                    instanceSpacePrams["zone"] = "main_zone";
+                    instanceSpacePrams["zone_owner"] = -1;
+                    instanceSpacePrams["actor_id"] = actor.InstanceID;
+                    instanceSpacePrams["creator_id"] = (long)SteamUser.GetSteamID().m_SteamID;
 
-                sendPacketToPlayer(spawnPacket, id);
+                    sendPacketToPlayer(spawnPacket, id);
+                }
             }
         }
 

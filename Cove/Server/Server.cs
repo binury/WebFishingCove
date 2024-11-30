@@ -62,6 +62,7 @@ namespace Cove.Server
         List<Vector3> hidden_spot;
 
         Dictionary<string, IHostedService> services = new();
+        public readonly object serverActorListLock = new();
 
         public void Init()
         {
@@ -196,7 +197,7 @@ namespace Cove.Server
 
             if (!SteamAPI.Init())
             {
-                Console.WriteLine("SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.");
+                Console.WriteLine("SteamAPI_Init() failed.");
                 Console.WriteLine("Is Steam running?");
                 return;
             }
@@ -371,7 +372,7 @@ namespace Cove.Server
         {
             while (true)
             {
-                Thread.Sleep(25);
+                Thread.Sleep(1000/24); // 24hz
                 SteamAPI.RunCallbacks();
             }
         }

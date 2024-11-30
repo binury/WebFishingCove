@@ -58,13 +58,16 @@ namespace Cove.Server.HostedServices
             // remove old instances!
             try
             {
-                foreach (WFActor inst in server.serverOwnedInstances.ToList())
+                lock (server.serverActorListLock)
                 {
-                    float instanceAge = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - inst.SpawnTime.ToUnixTimeSeconds();
-                    if (inst.despawn && instanceAge >= inst.despawnTime)
+                    foreach (WFActor inst in server.serverOwnedInstances.ToList())
                     {
-                        server.removeServerActor(inst);
-                        //Console.WriteLine($"Removed {inst.Type}, Decayed");
+                        float instanceAge = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - inst.SpawnTime.ToUnixTimeSeconds();
+                        if (inst.despawn && instanceAge >= inst.despawnTime)
+                        {
+                            server.removeServerActor(inst);
+                            //Console.WriteLine($"Removed {inst.Type}, Decayed");
+                        }
                     }
                 }
             }
