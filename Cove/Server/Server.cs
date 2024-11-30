@@ -34,7 +34,7 @@ namespace Cove.Server
         public string LobbyCode = new string(Enumerable.Range(0, 5).Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)]).ToArray());
         public bool codeOnly = true;
         public bool ageRestricted = false;
-        
+
         public string joinMessage = "This is a Cove dedicated server!\nPlease report any issues to the github (xr0.xyz/cove)";
         public bool displayJoinMessage = true;
 
@@ -66,7 +66,10 @@ namespace Cove.Server
         public void Init()
         {
             cbThread = new(runSteamworksUpdate);
+            cbThread.Name = "Steamworks Callback Thread";
+
             networkThread = new(RunNetwork);
+            networkThread.Name = "Network Thread";
 
             Console.WriteLine("Loading world!");
             string worldFile = $"{AppDomain.CurrentDomain.BaseDirectory}worlds/main_zone.tscn";
@@ -207,7 +210,7 @@ namespace Cove.Server
             // like 10 minutes of delay within 30 seconds
             networkThread.IsBackground = true;
             networkThread.Start();
-            
+
             bool LogServices = false;
             ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -367,13 +370,17 @@ namespace Cove.Server
         void runSteamworksUpdate()
         {
             while (true)
+            {
+                Thread.Sleep(25);
                 SteamAPI.RunCallbacks();
+            }
         }
 
         void RunNetwork()
         {
             while (true)
             {
+                bool didWork = false;
                 try
                 {
                     for (int i = 0; i < 6; i++)
@@ -382,6 +389,7 @@ namespace Cove.Server
                         // we are going to check if there are any incoming net packets!
                         if (SteamNetworking.IsP2PPacketAvailable(out packetSize, nChannel: i))
                         {
+                            didWork = true;
                             byte[] packet = new byte[packetSize];
                             uint bytesRead = 0;
                             CSteamID sender;
@@ -397,10 +405,13 @@ namespace Cove.Server
                 {
                     if (!showErrorMessages)
                         return;
-                    
+
                     Console.WriteLine("-- Error responding to packet! --");
                     Console.WriteLine(e.ToString());
                 }
+
+                if (!didWork)
+                    Thread.Sleep(10);
             }
         }
 
