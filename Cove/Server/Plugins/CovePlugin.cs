@@ -5,11 +5,11 @@ namespace Cove.Server.Plugins
     public class CovePlugin
     {
 
-        private CoveServer parentServer;
+        public CoveServer ParentServer;
 
         public CovePlugin(CoveServer parent)
         {
-            parentServer = parent;
+            ParentServer = parent;
         }
 
         // triggered when the plugin is started
@@ -25,81 +25,81 @@ namespace Cove.Server.Plugins
 
         public WFPlayer[] GetAllPlayers()
         {
-            return parentServer.AllPlayers.ToArray();
+            return ParentServer.AllPlayers.ToArray();
         }
 
         public void SendPlayerChatMessage(WFPlayer receiver, string message)
         {
             // remove a # incase its given
-            parentServer.messagePlayer(message, receiver.SteamId);
+            ParentServer.messagePlayer(message, receiver.SteamId);
         }
 
         public void SendGlobalChatMessage(string message)
         {
-            parentServer.messageGlobal(message);
+            ParentServer.messageGlobal(message);
         }
 
         public WFActor[] GetAllServerActors()
         {
-            return parentServer.serverOwnedInstances.ToArray();
+            return ParentServer.serverOwnedInstances.ToArray();
         }
 
         public WFActor? GetActorFromID(int id)
         {
-            return parentServer.serverOwnedInstances.Find(a => a.InstanceID == id);
+            return ParentServer.serverOwnedInstances.Find(a => a.InstanceID == id);
         }
 
         // please make sure you use the correct actorname or the game freaks out!
         public WFActor SpawnServerActor(string actorType)
         {
-            return parentServer.spawnGenericActor(actorType);
+            return ParentServer.spawnGenericActor(actorType);
         }
 
         public void RemoveServerActor(WFActor actor)
         {
-            parentServer.removeServerActor(actor);
+            ParentServer.removeServerActor(actor);
         }
 
         // i on god dont know what this dose to the actual actor but it works in game, so if you nee this its here
         public void SetServerActorZone(WFActor actor, string zoneName, int zoneOwner)
         {
-            parentServer.setActorZone(actor, zoneName, zoneOwner);
+            ParentServer.setActorZone(actor, zoneName, zoneOwner);
         }
 
         public void KickPlayer(WFPlayer player)
         {
-            parentServer.kickPlayer(player.SteamId);
+            ParentServer.kickPlayer(player.SteamId);
         }
 
         public void BanPlayer(WFPlayer player)
         {
-            if (parentServer.isPlayerBanned(player.SteamId))
+            if (ParentServer.isPlayerBanned(player.SteamId))
             {
-                parentServer.banPlayer(player.SteamId);
+                ParentServer.banPlayer(player.SteamId);
             } else
             {
-                parentServer.banPlayer(player.SteamId, true); // save to file if they are not already in there!
+                ParentServer.banPlayer(player.SteamId, true); // save to file if they are not already in there!
             }
         }
 
         public void Log(string message)
         {
-            parentServer.printPluginLog(message, this);
+            ParentServer.printPluginLog(message, this);
         }
 
         public bool IsPlayerAdmin(WFPlayer player)
         {
-            return parentServer.isPlayerAdmin(player.SteamId);
+            return ParentServer.isPlayerAdmin(player.SteamId);
         }
 
         public void SendPacketToPlayer(Dictionary<string, object> packet, WFPlayer player)
         {
-            parentServer.sendPacketToPlayer(packet, player.SteamId);
+            ParentServer.sendPacketToPlayer(packet, player.SteamId);
         }
 
         public void SendPacketToAll(Dictionary<string, object> packet)
         {
-            parentServer.sendPacketToPlayers(packet);
+            ParentServer.sendPacketToPlayers(packet);
         }
 
     }
