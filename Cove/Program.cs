@@ -29,6 +29,8 @@ void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     Dictionary<string, object> closePacket = new();
     closePacket["type"] = "server_close";
 
+    webfishingServer.loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
+
     webfishingServer.disconnectAllPlayers();
     SteamMatchmaking.LeaveLobby(webfishingServer.SteamLobby);
     SteamAPI.Shutdown();

@@ -14,11 +14,13 @@ namespace Cove.Server.Plugins
 
         // triggered when the plugin is started
         public virtual void onInit() { }
-        // triggerd 12/s
+        // triggered when the plugin is stopped or the server is stopped
+        public virtual void onEnd() { }
+        // triggered 12/s
         public virtual void onUpdate() { }
         // triggered when a player speaks in anyway (exluding / commands)
         public virtual void onChatMessage(WFPlayer sender, string message) { }
-        // triggerd when a player enters the server
+        // triggered when a player enters the server
         public virtual void onPlayerJoin(WFPlayer player) { }
         // triggered when a player leaves the server
         public virtual void onPlayerLeave(WFPlayer player) { }
