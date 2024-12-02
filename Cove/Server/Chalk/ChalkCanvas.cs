@@ -7,7 +7,7 @@ namespace Cove.Server.Chalk
     {
 
         public long canvasID;
-        Dictionary<Vector2, int> chalkImage = new Dictionary<Vector2, int>();
+        public Dictionary<Vector2, int> chalkImage = new Dictionary<Vector2, int>();
 
         public ChalkCanvas(long canvasID)
         {
