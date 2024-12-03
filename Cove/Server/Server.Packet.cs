@@ -162,7 +162,7 @@ namespace Cove.Server
                     {
                         long canvasID = (long)packetInfo["canvas_id"];
                         Chalk.ChalkCanvas canvas = chalkCanvas.Find(c => c.canvasID == canvasID);
-                        
+
                         if (canvas == null)
                         {
                             Console.WriteLine($"Creating new canvas: {canvasID}");
@@ -202,6 +202,8 @@ namespace Cove.Server
                         chunk.Add(i, kvp.Value);
                         i++;
                     }
+
+                    chunks.Add(chunk);
 
                     for (int index = 0; index < chunks.Count; index++)
                     {
