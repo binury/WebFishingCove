@@ -40,6 +40,7 @@ try
 {
     serverLogger.Fatal("Error occored on main thread");
     serverLogger.Fatal(e.ToString());
+    closeServer();
 }
 
 void Log(string message)
@@ -47,11 +48,8 @@ void Log(string message)
     serverLogger.Information(message);
 }
 
-Console.CancelKeyPress += Console_CancelKeyPress;
-void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+void closeServer()
 {
-    Log("Application is closing...");
-
     Dictionary<string, object> closePacket = new();
     closePacket["type"] = "server_close";
 
@@ -60,6 +58,14 @@ void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
     webfishingServer.disconnectAllPlayers();
     SteamMatchmaking.LeaveLobby(webfishingServer.SteamLobby);
     SteamAPI.Shutdown();
+    Environment.Exit(0);
+}
+
+Console.CancelKeyPress += Console_CancelKeyPress;
+void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+{
+    Log("Server closed from input");
+    closeServer();
 }
 
 while (true)
@@ -70,16 +76,8 @@ while (true)
     switch(command)
     {
         case "exit":
-            Log("Application is closing...");
-            Dictionary<string, object> closePacket = new();
-            closePacket["type"] = "server_close";
-
-            webfishingServer.loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
-          
-            webfishingServer.disconnectAllPlayers();
-            SteamMatchmaking.LeaveLobby(webfishingServer.SteamLobby);
-            SteamAPI.Shutdown();
-            Environment.Exit(0);
+            Log("Server closed from console");
+            closeServer();
             break;
         case "say":
             {

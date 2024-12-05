@@ -22,13 +22,11 @@ using Microsoft.Extensions.Hosting;
 using Cove.Server.HostedServices;
 using Microsoft.Extensions.Logging;
 using Vector3 = Cove.GodotFormat.Vector3;
-using System.Reflection;
 
 namespace Cove.Server
 {
     public partial class CoveServer
     {
-
         public Serilog.Core.Logger logger;
 
         public readonly string WebFishingGameVersion = "1.1"; // make sure to update this when the game updates!

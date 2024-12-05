@@ -33,6 +33,13 @@ namespace Cove.Server
             if (isPlayerBanned(sender))
                 banPlayer(sender);
 
+            var fromPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
+            foreach (var loadedPlugin in loadedPlugins)
+            {
+                if (fromPlayer != null)
+                    loadedPlugin.plugin.onNetworkPacket(fromPlayer, packetInfo);
+            }
+
             switch ((string)packetInfo["type"])
             {
                 case "handshake_request":
