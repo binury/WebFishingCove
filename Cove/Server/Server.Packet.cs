@@ -69,6 +69,8 @@ namespace Cove.Server
                         string type = (string)((Dictionary<string, object>)packetInfo["params"])["actor_type"];
                         long actorID = (long)((Dictionary<string, object>)packetInfo["params"])["actor_id"];
 
+                        Log($"Player spawned in a {type} actor");
+
                         // all actor types that should not be spawned by anyone but the server!
                         if (type == "fish_spawn_alien" || type == "fish_spawn" || type == "raincloud")
                         {
@@ -87,7 +89,7 @@ namespace Cove.Server
                         {
                             WFPlayer thisPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
                             if (thisPlayer == null)
-                                Console.WriteLine("No fisher found for player instance!");
+                                Log("No fisher found for player instance!");
                             else
                             {
                                 thisPlayer.InstanceID = actorID;
@@ -142,7 +144,7 @@ namespace Cove.Server
                                 if (serverInst.Type == "raincloud")
                                     return;
 
-                                Console.WriteLine($"Player asked to remove {serverInst.Type} actor");
+                                Log($"Player asked to remove {serverInst.Type} actor");
 
                                 // the sever owns the instance
                                 removeServerActor(serverInst);
@@ -165,7 +167,7 @@ namespace Cove.Server
 
                         if (canvas == null)
                         {
-                            Console.WriteLine($"Creating new canvas: {canvasID}");
+                            Log($"Creating new canvas: {canvasID}");
                             canvas = new Chalk.ChalkCanvas(canvasID);
                             chalkCanvas.Add(canvas);
                         }
@@ -215,7 +217,7 @@ namespace Cove.Server
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Error(e.ToString());
             }
         }
     }

@@ -26,7 +26,7 @@ namespace Cove.Server
     {
         Dictionary<string, object> readPacket(byte[] packetBytes)
         {
-            return (new GodotReader(packetBytes)).readPacket();
+            return (new GodotReader(packetBytes, logger)).readPacket();
         }
 
         byte[] writePacket(Dictionary<string, object> packet)

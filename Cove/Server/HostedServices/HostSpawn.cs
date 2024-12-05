@@ -66,7 +66,7 @@ namespace Cove.Server.HostedServices
                         if (inst.despawn && instanceAge >= inst.despawnTime)
                         {
                             server.removeServerActor(inst);
-                            //Console.WriteLine($"Removed {inst.Type}, Decayed");
+                            //Log($"Removed {inst.Type}, Decayed");
                         }
                     }
                 }

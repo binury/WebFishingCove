@@ -26,7 +26,7 @@ namespace Cove.Server.Utils
                 {
                     string fileContence = readFromAssembly(resourceName + "." + fileName);
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Using default {fileName}, it has been added to the root directory for editing!");
+                    //Log($"Using default {fileName}, it has been added to the root directory for editing!");
                     Console.ResetColor();
 
                     File.WriteAllText(filePath, fileContence);

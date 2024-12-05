@@ -22,11 +22,13 @@ namespace Cove.GodotFormat
 
         public byte[] data;
         private BinaryReader reader;
+        public Serilog.Core.Logger logger;
 
-        public GodotReader(byte[] data)
+        public GodotReader(byte[] data, Serilog.Core.Logger serverLogger)
         {
             this.data = data;
             reader = new BinaryReader(new MemoryStream(data), System.Text.Encoding.UTF8);
+            logger = serverLogger;
         }
 
         public Dictionary<string, object> readPacket()
@@ -46,8 +48,8 @@ namespace Cove.GodotFormat
             }
             catch (Exception e)
             {
-                Console.WriteLine("-- Error reading packet! --"); // incase we do have a error!
-                Console.WriteLine(e.ToString()); // incase we do have a error!
+                logger.Error("-- Error reading packet! --"); // incase we do have a error!
+                logger.Error(e.ToString()); // incase we do have a error!
             }
 
             return dic;
@@ -96,7 +98,7 @@ namespace Cove.GodotFormat
                     return readVector2();
 
                 default:
-                    Console.WriteLine($"Unable to handel object of type: {type}");
+                    logger.Error($"Unable to handel object of type: {type}");
                     return new ReadError();
             }
         }
@@ -214,7 +216,7 @@ namespace Cove.GodotFormat
 
                 if (keyValue == null || !(keyValue is String)) // if the value is not a string (bad read) break the loop.
                 {
-                    Console.WriteLine("READ ERROR, KEY PROVIDED IS NOT A STRING!");
+                    logger.Error("READ ERROR, KEY PROVIDED IS NOT A STRING!");
                     break; //break from the loop to save the server!
                 }
                 else

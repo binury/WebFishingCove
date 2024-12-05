@@ -28,6 +28,9 @@ namespace Cove.Server
 {
     public partial class CoveServer
     {
+
+        public Serilog.Core.Logger logger;
+
         public readonly string WebFishingGameVersion = "1.1"; // make sure to update this when the game updates!
         public int MaxPlayers = 20;
         public string ServerName = "A Cove Dedicated Server";
@@ -72,15 +75,15 @@ namespace Cove.Server
             networkThread = new(RunNetwork);
             networkThread.Name = "Network Thread";
 
-            Console.WriteLine("Loading world!");
+            Log("Loading world!");
             string worldFile = $"{AppDomain.CurrentDomain.BaseDirectory}worlds/main_zone.tscn";
             if (!File.Exists(worldFile))
             {
-                Console.WriteLine("-- ERROR --");
-                Console.WriteLine("main_zone.tscn is missing!");
-                Console.WriteLine("please put a world file in the /worlds folder so the server may load it!");
-                Console.WriteLine("-- ERROR --");
-                Console.WriteLine("Press any key to exit");
+                Log("-- ERROR --");
+                Log("main_zone.tscn is missing!");
+                Log("please put a world file in the /worlds folder so the server may load it!");
+                Log("-- ERROR --");
+                Log("Press any key to exit");
 
                 Console.ReadKey();
 
@@ -101,9 +104,9 @@ namespace Cove.Server
             shoreline_points = WorldFile.readPoints("shoreline_point", mapFile);
             hidden_spot = WorldFile.readPoints("hidden_spot", mapFile);
 
-            Console.WriteLine("World Loaded!");
+            Log("World Loaded!");
 
-            Console.WriteLine("Reading server.cfg");
+            Log("Reading server.cfg");
 
             Dictionary<string, string> config = ConfigReader.ReadConfig("server.cfg");
             foreach (string key in config.Keys)
@@ -171,19 +174,19 @@ namespace Cove.Server
                         break;
 
                     default:
-                        Console.WriteLine($"\"{key}\" is not a supported config option!");
+                        Log($"\"{key}\" is not a supported config option!");
                         continue;
                 }
 
-                Console.WriteLine($"Set \"{key}\" to \"{config[key]}\"");
+                Log($"Set \"{key}\" to \"{config[key]}\"");
 
             }
 
-            Console.WriteLine("Server setup based on config!");
+            Log("Server setup based on config!");
 
-            Console.WriteLine("Reading admins.cfg");
+            Log("Reading admins.cfg");
             readAdmins();
-            Console.WriteLine("Setup finished, starting server!");
+            Log("Setup finished, starting server!");
 
             if (Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}plugins"))
             {
@@ -192,13 +195,13 @@ namespace Cove.Server
             else
             {
                 Directory.CreateDirectory($"{AppDomain.CurrentDomain.BaseDirectory}plugins");
-                Console.WriteLine("Created plugins folder!");
+                Log("Created plugins folder!");
             }
 
             if (!SteamAPI.Init())
             {
-                Console.WriteLine("SteamAPI_Init() failed.");
-                Console.WriteLine("Is Steam running?");
+                Log("SteamAPI_Init() failed.");
+                Log("Is Steam running?");
                 return;
             }
 
@@ -252,11 +255,8 @@ namespace Cove.Server
                 SteamMatchmaking.SetLobbyData(SteamLobby, "cap", MaxPlayers.ToString());
                 SteamNetworking.AllowP2PPacketRelay(true);
                 SteamMatchmaking.SetLobbyData(SteamLobby, "server_browser_value", "0");
-                Console.WriteLine("Lobby Created!");
-                Console.Write("Lobby Code: ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine(LobbyCode);
-                Console.ResetColor();
+                Log("Lobby Created!");
+                Log($"Lobby Code: {LobbyCode}");
                 // set the player count in the title
                 updatePlayercount();
 
@@ -278,13 +278,13 @@ namespace Cove.Server
 
                     if (!isPlayerBanned(userChanged))
                     {
-                        Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has joined the game!");
+                        Log($"{Username} [{userChanged.m_SteamID}] has joined the game!");
                         updatePlayercount();
                     }
 
                     if (AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID) != null)
                     {
-                        Console.WriteLine($"{Username} is already in the server, rejecting");
+                        Log($"{Username} is already in the server, rejecting");
                         sendBlacklistPacketToAll(userChanged.m_SteamID.ToString()); // tell players to blacklist the player
                         return; // player is already in the server, dont add them again
                     }
@@ -304,8 +304,8 @@ namespace Cove.Server
                     if (userChanged.m_SteamID == SteamUser.GetSteamID().m_SteamID)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("The account running the server has joined the game!");
-                        Console.WriteLine("This will cause issues, please run the server on a different account!");
+                        Log("The account running the server has joined the game!");
+                        Log("This will cause issues, please run the server on a different account!");
                         Console.ResetColor();
                     }
                 }
@@ -316,7 +316,7 @@ namespace Cove.Server
 
                     if (!isPlayerBanned(userChanged))
                     {
-                        Console.WriteLine($"{Username} [{userChanged.m_SteamID}] has left the game!");
+                        Log($"{Username} [{userChanged.m_SteamID}] has left the game!");
                         updatePlayercount();
                     }
 
@@ -337,14 +337,14 @@ namespace Cove.Server
                 CSteamID[] members = getAllPlayers();
                 if (!members.Contains(param.m_steamIDRemote) && AllPlayers.Find(p => p.SteamId.m_SteamID == param.m_steamIDRemote.m_SteamID) == null)
                 {
-                    Console.WriteLine($"Got P2P request from {param.m_steamIDRemote}, but they are not in the lobby!");
+                    Log($"Got P2P request from {param.m_steamIDRemote}, but they are not in the lobby!");
                     SteamNetworking.CloseP2PSessionWithUser(param.m_steamIDRemote);
                     return;
                 }
 
                 if (isPlayerBanned(param.m_steamIDRemote))
                 {
-                    Console.WriteLine($"Got P2P request from {param.m_steamIDRemote}, but they are banned!");
+                    Log($"Got P2P request from {param.m_steamIDRemote}, but they are banned!");
                     SteamNetworking.CloseP2PSessionWithUser(param.m_steamIDRemote);
                     sendBlacklistPacketToAll(param.m_steamIDRemote.m_SteamID.ToString());
                     return;
@@ -407,8 +407,8 @@ namespace Cove.Server
                     if (!showErrorMessages)
                         return;
 
-                    Console.WriteLine("-- Error responding to packet! --");
-                    Console.WriteLine(e.ToString());
+                    Log("-- Error responding to packet! --");
+                    Log(e.ToString());
                 }
 
                 if (!didWork)
@@ -422,17 +422,27 @@ namespace Cove.Server
             WFPlayer sender = AllPlayers.Find(p => p.SteamId == id);
             if (sender == null)
             {
-                Console.WriteLine($"[UNKNOWN] {id}: {message}");
+                Log($"[UNKNOWN] {id}: {message}");
                 // should probbaly kick the player here
                 return;
             }
 
-            Console.WriteLine($"[{sender.FisherID}] {sender.Username}: {message}");
+            Log($"[{sender.FisherID}] {sender.Username}: {message}");
 
             foreach (PluginInstance plugin in loadedPlugins)
             {
                 plugin.plugin.onChatMessage(sender, message);
             }
+        }
+
+        void Log(string value)
+        {
+            logger.Information(value);
+        }
+
+        void Error(string value)
+        {
+            logger.Error(value);
         }
     }
 }

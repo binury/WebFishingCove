@@ -98,7 +98,8 @@ namespace Cove.Server.HostedServices
             }
             catch (InvalidOperationException e)
             {
-                //Console.WriteLine(e);
+                _logger.LogError(e.ToString());
+                //Log(e);
                 // just means the list was modified while iterating
                 // most likly a actor was added or removed because of a spawn or despawn
                 // nothing to worry about

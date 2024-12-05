@@ -35,7 +35,7 @@ namespace Cove.Server
             {
                 if (config[key].ToLower() == "true")
                 {
-                    Console.WriteLine($"Added {key} as admin!");
+                    Log($"Added {key} as admin!");
                     Admins.Add(key);
                     WFPlayer player = AllPlayers.Find(p => p.SteamId.m_SteamID.ToString() == key);
                     if (player != null)
@@ -122,7 +122,7 @@ namespace Cove.Server
             long IId = new Random().NextInt64();
             while (findActorByID(IId) != null)
             {
-                Console.WriteLine("Actor ID Collided!");
+                Log("Actor ID Collided!");
                 IId = new Random().NextInt64();
             }
 
@@ -347,7 +347,7 @@ namespace Cove.Server
         {
 
             PluginInstance pluginInfo = loadedPlugins.Find(i => i.plugin == caller);
-            Console.WriteLine($"[{pluginInfo.pluginName}] {message}");
+            Log($"[{pluginInfo.pluginName}] {message}");
         }
     }
 }

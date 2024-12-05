@@ -14,16 +14,18 @@ namespace Cove.Server
 
             if (!arePluginsEnabled) return; // plugins are disabled!
 
-            Console.WriteLine("\n------------ WARNING ------------");
-            Console.WriteLine("YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE");
-            Console.WriteLine("ANY AND ALL DAMMAGE TO YOUR COMPUTER IS YOU AND YOUR FAULT ALONE");
-            Console.WriteLine("DO NOT RUN ANY UNTRUSTED PLUGINS!");
-            Console.WriteLine("IF YOU ARE RUNNING UNTRUSTED PLUGINS EXIT COVE NOW");
-            Console.WriteLine("------------ WARNING ------------\n");
+            Log("");
+            Log("------------ WARNING ------------");
+            Log("YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE");
+            Log("ANY AND ALL DAMMAGE TO YOUR COMPUTER IS YOU AND YOUR FAULT ALONE");
+            Log("DO NOT RUN ANY UNTRUSTED PLUGINS!");
+            Log("IF YOU ARE RUNNING UNTRUSTED PLUGINS EXIT COVE NOW");
+            Log("------------ WARNING ------------");
+            Log("");
 
             Thread.Sleep(5000);
 
-            Console.WriteLine("Loading Plugins...");
+            Log("Loading Plugins...");
 
             string pluginsFolder = $"{AppDomain.CurrentDomain.BaseDirectory}plugins";
 
@@ -39,11 +41,11 @@ namespace Cove.Server
                 }
                 catch (BadImageFormatException)
                 {
-                    Console.WriteLine($"File: {fileName} is not a plugin!");
+                    Log($"File: {fileName} is not a plugin!");
                 }
             }
 
-            Console.WriteLine($"Found {pluginAssemblys.Count} plugins!");
+            Log($"Found {pluginAssemblys.Count} plugins!");
 
             foreach (Assembly assembly in pluginAssemblys)
             {
@@ -65,11 +67,11 @@ namespace Cove.Server
                             PluginInstance thisInstance = new(plugin, config["name"], config["id"], config["author"]);
 
                             loadedPlugins.Add(thisInstance);
-                            Console.WriteLine($"Plugin Init: {config["name"]}");
+                            Log($"Plugin Init: {config["name"]}");
                             plugin.onInit(); // start the plugin!
                         }
                         else
-                            Console.WriteLine($"Unable to load {type.FullName}");
+                            Log($"Unable to load {type.FullName}");
                     }
                 }
             }

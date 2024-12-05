@@ -33,8 +33,6 @@ namespace Cove.Server.Utils
                 }
             }
 
-            Console.WriteLine($"Found {points.Count} points of group \"{nodeGroup}\"");
-
             return points;
         }
 
