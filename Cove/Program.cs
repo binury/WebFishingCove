@@ -19,9 +19,12 @@ using Cove.Server.Actor;
 using Steamworks;
 using Serilog;
 
+
+long epoch = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
+
 var serverLogger = new LoggerConfiguration()
     .WriteTo.Console()
-    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // Daily rolling logs
+    .WriteTo.File($"logs/log-{epoch}.txt") // Daily rolling logs
     .CreateLogger();
 
 //Console.SetOut(new SerilogTextWriter(serverLogger));
