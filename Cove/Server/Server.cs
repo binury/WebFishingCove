@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Cove.Server.HostedServices;
 using Microsoft.Extensions.Logging;
 using Vector3 = Cove.GodotFormat.Vector3;
+using Serilog;
 
 namespace Cove.Server
 {
@@ -213,11 +214,16 @@ namespace Cove.Server
             networkThread.IsBackground = true;
             networkThread.Start();
 
+            // Create a logger for the server
+            Serilog.Log.Logger = logger;
+
             bool LogServices = false;
             ILoggerFactory loggerFactory = LoggerFactory.Create(builder =>
             {
                 if (LogServices)
                     builder.AddConsole();
+
+                builder.AddSerilog(logger);
             });
 
             // Create a logger for each service that we need to run.

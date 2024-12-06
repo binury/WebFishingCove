@@ -38,7 +38,7 @@ namespace Cove.Server.HostedServices
         // This method is called when the service is starting.
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("HostSpawnMetalService is starting.");
+            _logger.LogInformation("Host_Spawn_Metal_Service is up.");
 
             // Setup a timer to trigger the task periodically.
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(8));
@@ -49,18 +49,23 @@ namespace Cove.Server.HostedServices
         // This is the method that will be triggered periodically by the timer.
         private void DoWork(object state)
         {
-            _logger.LogInformation("HostSpawnMetalService is working.");
+            try
+            {
+                // still got no idea
+                //server.gameLobby.SetData("server_browser_value", "0");
+                SteamMatchmaking.SetLobbyData(server.SteamLobby, "server_browser_value", "0");
 
-            // still got no idea
-            //server.gameLobby.SetData("server_browser_value", "0");
-            SteamMatchmaking.SetLobbyData(server.SteamLobby, "server_browser_value", "0");
+                int metalCount = server.serverOwnedInstances.FindAll(a => a.Type == "metal_spawn").Count;
+                if (metalCount > 7)
+                    return;
 
-            int metalCount = server.serverOwnedInstances.FindAll(a => a.Type == "metal_spawn").Count;
-            if (metalCount > 7)
-                return;
-
-            if (server.shouldSpawnMetal)
-                server.spawnMetal();
+                if (server.shouldSpawnMetal)
+                    server.spawnMetal();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.ToString());
+            }
         }
 
         // This method is called when the service is stopping.

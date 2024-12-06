@@ -43,7 +43,7 @@ namespace Cove.Server.HostedServices
         // This method is called when the service is starting.
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("ActorUpdateService is starting.");
+            _logger.LogInformation("Actor_Update_Service is up.");
 
             // Setup a timer to trigger the task periodically.
             _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(1) / 12);
@@ -58,17 +58,16 @@ namespace Cove.Server.HostedServices
         // This is the method that will be triggered periodically by the timer.
         private void DoWork(object state)
         {
-            //_logger.LogInformation("ActorUpdateService is working.");
-
             updateI++;
-
-            foreach (PluginInstance plugin in server.loadedPlugins)
-            {
-                plugin.plugin.onUpdate();
-            }
 
             try
             {
+
+                foreach (PluginInstance plugin in server.loadedPlugins)
+                {
+                    plugin.plugin.onUpdate();
+                }
+
                 lock (server.serverActorListLock)
                 {
                     foreach (WFActor actor in server.serverOwnedInstances.ToList())
@@ -96,7 +95,7 @@ namespace Cove.Server.HostedServices
                     }
                 }
             }
-            catch (InvalidOperationException e)
+            catch (Exception e)
             {
                 _logger.LogError(e.ToString());
                 //Log(e);
