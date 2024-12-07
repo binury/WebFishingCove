@@ -40,7 +40,7 @@ try
 {
     serverLogger.Fatal("Error occored on main thread");
     serverLogger.Fatal(e.ToString());
-    closeServer();
+    webfishingServer.Stop();
 }
 
 void Log(string message)
@@ -48,24 +48,11 @@ void Log(string message)
     serverLogger.Information(message);
 }
 
-void closeServer()
-{
-    Dictionary<string, object> closePacket = new();
-    closePacket["type"] = "server_close";
-
-    webfishingServer.loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
-
-    webfishingServer.disconnectAllPlayers();
-    SteamMatchmaking.LeaveLobby(webfishingServer.SteamLobby);
-    SteamAPI.Shutdown();
-    Environment.Exit(0);
-}
-
 Console.CancelKeyPress += Console_CancelKeyPress;
 void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
 {
     Log("Server closed from input");
-    closeServer();
+    webfishingServer.Stop();
 }
 
 while (true)

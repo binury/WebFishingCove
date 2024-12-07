@@ -58,15 +58,8 @@ namespace Cove.Server
                 }
                 messagePlayer("Server is shutting down!", player.SteamId);
 
-                Dictionary<string, object> closePacket = new();
-                closePacket["type"] = "server_close";
+                Stop(); // stop the server
 
-                loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
-
-                disconnectAllPlayers();
-                SteamMatchmaking.LeaveLobby(SteamLobby);
-                SteamAPI.Shutdown();
-                Environment.Exit(0);
             });
             SetCommandDescription("exit", "Shuts down the server (host only)");
         }

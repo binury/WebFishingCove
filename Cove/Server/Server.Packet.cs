@@ -149,7 +149,7 @@ namespace Cove.Server
                                 if (serverInst.Type == "raincloud")
                                     return;
 
-                                Log($"Player asked to remove {serverInst.Type} actor");
+                                //Log($"Player asked to remove {serverInst.Type} actor");
 
                                 // the sever owns the instance
                                 removeServerActor(serverInst);

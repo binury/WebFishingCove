@@ -242,11 +242,6 @@ namespace Cove.Server
             IHostedService hostSpawnService = new HostSpawnService(hostSpawnServiceLogger, this);
             IHostedService hostSpawnMetalService = new HostSpawnMetalService(hostSpawnMetalServiceLogger, this);
 
-            // Start the services.
-            actorUpdateService.StartAsync(CancellationToken.None);
-            hostSpawnService.StartAsync(CancellationToken.None);
-            hostSpawnMetalService.StartAsync(CancellationToken.None);
-
             // add them to the services dictionary so we can access them later if needed
             services["actor_update"] = actorUpdateService;
             services["host_spawn"] = hostSpawnService;
@@ -270,7 +265,11 @@ namespace Cove.Server
                 // set the player count in the title
                 updatePlayercount();
 
-                SteamFriends.SetRichPresence("steam_display", $"hosting a server");
+                // Start the services.
+                actorUpdateService.StartAsync(CancellationToken.None);
+                hostSpawnService.StartAsync(CancellationToken.None);
+                hostSpawnMetalService.StartAsync(CancellationToken.None);
+
             });
 
             Callback<LobbyChatUpdate_t>.Create((LobbyChatUpdate_t param) =>
@@ -424,6 +423,20 @@ namespace Cove.Server
                 if (!didWork)
                     Thread.Sleep(10);
             }
+        }
+
+        public void Stop()
+        {
+            Log("Server was told to stop.");
+            Dictionary<string, object> closePacket = new();
+            closePacket["type"] = "server_close";
+
+            loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
+
+            disconnectAllPlayers();
+            SteamMatchmaking.LeaveLobby(SteamLobby);
+            SteamAPI.Shutdown();
+            Environment.Exit(0);
         }
 
         void OnPlayerChat(string message, CSteamID id)

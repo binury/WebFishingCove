@@ -25,9 +25,9 @@ If you have any questions or issues with Cove, **create and issue on Github** or
 - [X] Spawn actors required for the metal detector
 - [X] Improve error handling
 - [X] Some sort of plugin or modding support (C# API)
-- [ ] Add proper support for actor handling (90%)
+- [X] Add proper support for actor handling
 - [X] Make hostspawn and metalspawn IHostedService's
-- [ ] Write a plugin guide / how to create plugins
+- [X] Write a plugin guide / how to create plugins, can be found here [Plugins.md](./Plugins.md)
 
 # How to run:
 
@@ -59,6 +59,10 @@ If you have any questions or issues with Cove, **create and issue on Github** or
 
 	 
 # Other info
+
+Some default / popular plugins can be found in the [CovePlugins](https://github.com/DrMeepso/CovePlugins) repo
+
+The repo for a template plugin can be found here: [CovePluginTemplate](https://github.com/DrMeepso/TemplateCovePlugin)
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E0E65CR)
 

@@ -1,5 +1,4 @@
 # Loading / Installing plugins
-
 - Run CoveServer once to generate the `/plugins` directory.
 - Make sure you have plugins enabled in the `server.cfg` file!
 - Place the plugin dll file in the `/plugins` directory.
@@ -8,6 +7,9 @@
 - If the plugin is not loaded, check the CoveServer log for errors.
 
 # Creating Plugins
+
+The repo for a template plugin can be found here: [CovePluginTemplate](https://github.com/DrMeepso/TemplateCovePlugin)
+
 - Make sure you have dotnet 8.0 installed. (Cove uses .net 8!)
 - Create a new class library project in your IDE of choice.
 - Add a reference to the `Cove.dll` file, this can be found in the CoveServer directory.

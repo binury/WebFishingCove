@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Cove.Server.Actor;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Steamworks;
 
 
 
@@ -53,6 +54,18 @@ namespace Cove.Server.HostedServices
         // This is the method that will be triggered periodically by the timer.
         private void DoWork(object state)
         {
+            // check that the host of the lobby is still the server
+            if (SteamMatchmaking.GetLobbyOwner(server.SteamLobby).m_SteamID != server.serverPlayer.SteamId.m_SteamID)
+            {
+                // somthing has gone wrong, the server is no longer the host of the lobby
+                server.logger.Fatal("The server is no longer the host of the lobby, shutting down.");
+                server.logger.Fatal("Make sure you have a good connection to steam, this happends when the server disconnects from steam");
+                server.logger.Fatal("If your internet is unstable, this will happen offten!");
+
+                // stop the server
+                server.Stop();
+            }
+
             // remove old instances!
             try
             {
@@ -64,7 +77,6 @@ namespace Cove.Server.HostedServices
                         if (inst.despawn && instanceAge >= inst.despawnTime)
                         {
                             server.removeServerActor(inst);
-                            //Log($"Removed {inst.Type}, Decayed");
                         }
                     }
                 }
