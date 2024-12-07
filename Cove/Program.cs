@@ -73,77 +73,12 @@ while (true)
     string input = Console.ReadLine();
     string command = input.Split(' ')[0];
 
-    switch(command)
+    if (webfishingServer.DoseCommandExist(command))
     {
-        case "exit":
-            Log("Server closed from console");
-            closeServer();
-            break;
-        case "say":
-            {
-                string message = input.Substring(command.Length + 1);
-                webfishingServer.messageGlobal($"Server: {message}");
-                Log($"Server: {message}");
-            }
-            break;
-        case "ban":
-            {
-                string id = input.Substring(command.Length + 1);
-                WFPlayer player = webfishingServer.AllPlayers.Find(p => p.Username.ToLower() == id.ToLower());
-                if (player != null)
-                {
-                    if (webfishingServer.isPlayerBanned(player.SteamId))
-                    {
-                        Log($"Player {player.Username} is already banned!");
-                        break;
-                    } else
-                    {
-                        webfishingServer.banPlayer(player.SteamId, true);
-                    }
-                    Log($"Banned player {player.Username}");
-                }
-                else
-                {
-                    Log("Player not found!");
-                }
-            }
-            break;
-        case "kick":
-            {
-                string id = input.Substring(command.Length + 1);
-                WFPlayer player = webfishingServer.AllPlayers.Find(p => p.Username.ToLower() == id.ToLower());
-                if (player != null)
-                {
-                    webfishingServer.kickPlayer(player.SteamId);
-                    Log($"Kicked player {player.Username}");
-                }
-                else
-                {
-                    Log("Player not found!");
-                }
-            }
-            break;
-        case "players":
-            Log("Players:");
-            foreach (WFPlayer player in webfishingServer.AllPlayers)
-            {
-                Log(player.Username);
-            }
-            break;
-        case "help":
-            Log("Commands:");
-            Log("exit - Closes the application");
-            Log("say <message> - Sends a message to all players");
-            Log("ban <player> - Bans a player");
-            Log("kick <player> - Kicks a player");
-            Log("help - Shows this message");
-            Log("players - Lists all players");
-            Log("");
-            Log("players are the username of the player");
-            break;
-        default:
-            Log("Unknown command! Type 'help' for a list of commands.");
-            break;
+        string[] commandArgs = input.Split(' ').Skip(1).ToArray();
+        webfishingServer.InvokeCommand(webfishingServer.serverPlayer, command, commandArgs);
     }
+    else
+        Log("Command not found!");
 
 }

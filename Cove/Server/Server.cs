@@ -55,6 +55,8 @@ namespace Cove.Server
         public List<WFActor> serverOwnedInstances = new();
         public List<WFActor> allActors = new();
 
+        public WFPlayer serverPlayer;
+
         Thread cbThread;
         Thread networkThread;
 
@@ -187,6 +189,8 @@ namespace Cove.Server
             readAdmins();
             Log("Setup finished, starting server!");
 
+            RegisterDefaultCommands(); // register the default commands
+
             if (Directory.Exists($"{AppDomain.CurrentDomain.BaseDirectory}plugins"))
             {
                 loadAllPlugins();
@@ -203,6 +207,8 @@ namespace Cove.Server
                 Log("Is Steam running?");
                 return;
             }
+
+            serverPlayer = new WFPlayer(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
 
             // thread for running steamworks callbacks
             cbThread.IsBackground = true;
@@ -432,6 +438,22 @@ namespace Cove.Server
             }
 
             Log($"[{sender.FisherID}] {sender.Username}: {message}");
+
+            // check if the first char is !, if so its a command
+            if (message.StartsWith("!"))
+            {
+                string command = message.Split(' ')[0].Substring(1);
+                string[] args = message.Split(' ').Skip(1).ToArray();
+                if (DoseCommandExist(command))
+                {
+                    InvokeCommand(sender, command, args);
+                }
+                else
+                {
+                    messagePlayer("Command not found!", sender.SteamId);
+                    Log("Command not found!");
+                }
+            }
 
             foreach (PluginInstance plugin in loadedPlugins)
             {

@@ -76,8 +76,6 @@ namespace Cove.Server
                         string type = (string)((Dictionary<string, object>)packetInfo["params"])["actor_type"];
                         long actorID = (long)((Dictionary<string, object>)packetInfo["params"])["actor_id"];
 
-                        Log($"Player spawned in a {type} actor");
-
                         // all actor types that should not be spawned by anyone but the server!
                         if (type == "fish_spawn_alien" || type == "fish_spawn" || type == "raincloud")
                         {

@@ -46,7 +46,7 @@ namespace Cove.Server
             }
         }
 
-        public void spawnRainCloud()
+        public WFActor spawnRainCloud()
         {
             Random rand = new Random();
             Dictionary<string, object> rainSpawnPacket = new Dictionary<string, object>();
@@ -76,6 +76,8 @@ namespace Cove.Server
                 serverOwnedInstances.Add(cloud);
 
             allActors.Add(cloud);
+
+            return cloud;
         }
 
         public WFActor spawnFish(string fishType = "fish_spawn")
@@ -274,6 +276,12 @@ namespace Cove.Server
             chatPacket["zone"] = "main_zone";
             chatPacket["zone_owner"] = 1;
 
+            if (id.m_SteamID == SteamUser.GetSteamID().m_SteamID)
+            {
+                Log($"{msg}");
+                return;
+            }
+
             sendPacketToPlayer(chatPacket, id);
         }
 
@@ -308,6 +316,10 @@ namespace Cove.Server
 
         public bool isPlayerAdmin(CSteamID id)
         {
+            // if the server is being checked, they are an admin
+            if (id.m_SteamID == serverPlayer.SteamId.m_SteamID)
+                return true;
+
             string adminSteamID = Admins.Find(a => long.Parse(a) == (long)id.m_SteamID);
             return adminSteamID is string;
         }
