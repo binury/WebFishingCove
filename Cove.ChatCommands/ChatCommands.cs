@@ -206,5 +206,13 @@ public class ChatCommands : CovePlugin
         });
         SetCommandDescription("uptime", "Shows the server uptime");
 
+        RegisterCommand("say", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+            string message = string.Join(" ", args);
+            SendGlobalChatMessage($"[Server] {message}");
+        });
+        SetCommandDescription("say", "Sends a message to all players");
+
     }
 }

@@ -43,6 +43,13 @@ try
     webfishingServer.Stop();
 }
 
+AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+{
+    serverLogger.Fatal("Unhandled exception occured");
+    serverLogger.Fatal(args.ExceptionObject.ToString());
+    webfishingServer.Stop();
+};
+
 void Log(string message)
 {
     serverLogger.Information(message);
