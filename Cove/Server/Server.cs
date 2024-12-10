@@ -46,6 +46,7 @@ namespace Cove.Server
         public bool shouldSpawnPortal = true;
 
         public bool showErrorMessages = true;
+        public bool showBotRejoins = true;
         public bool friendsOnly = false;
 
         List<string> Admins = new();
@@ -174,6 +175,10 @@ namespace Cove.Server
                         displayJoinMessage = !getBoolFromString(config[key]);
                         break;
 
+                    case "showBotRejoins":
+                        showBotRejoins = getBoolFromString(config[key]);
+                        break;
+
                     default:
                         Log($"\"{key}\" is not a supported config option!");
                         continue;
@@ -293,7 +298,9 @@ namespace Cove.Server
 
                     if (AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID) != null)
                     {
-                        Log($"{Username} is already in the server, rejecting");
+                        if (showBotRejoins)
+                            Log($"{Username} is already in the server, rejecting");
+
                         sendBlacklistPacketToAll(userChanged.m_SteamID.ToString()); // tell players to blacklist the player
                         return; // player is already in the server, dont add them again
                     }

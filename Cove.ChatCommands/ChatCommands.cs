@@ -214,5 +214,95 @@ public class ChatCommands : CovePlugin
         });
         SetCommandDescription("say", "Sends a message to all players");
 
+        RegisterCommand("chalkrecent", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+
+            // rearange the list so the most recent is first
+            List<WFPlayer> reversedList = new List<WFPlayer>(lastToUseChalk);
+            reversedList.Reverse();
+
+            string message = "Most recent chalk users:";
+            foreach (var p in reversedList)
+            {
+                message += $"\n{p.Username}: {p.FisherID}";
+            }
+
+            SendPlayerChatMessage(player, message);
+        });
+        SetCommandDescription("chalkrecent", "Shows the 10 most recent players to use chalk");
+
+        RegisterCommand("reload", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+            
+            SendPlayerChatMessage(player, "Reloading plugins, this can cause unintended behaviour in plugins that don't cleanup properly");
+
+            foreach(PluginInstance plugin in Server.loadedPlugins)
+            {
+                plugin.plugin.onEnd();
+                Log($"Unloaded plugin {plugin.plugin.GetType().Name}");
+            }
+
+            Server.loadedPlugins.Clear(); // clear the list
+
+            Server.loadAllPlugins(true); // reload all plugins
+
+            SendPlayerChatMessage(player, "Plugins have been reloaded!");
+        });
+        SetCommandDescription("reload", "Reloads all plugins");
+
+        RegisterCommand("plugins", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+            string message = "Loaded plugins:";
+            foreach (PluginInstance plugin in Server.loadedPlugins)
+            {
+                message += $"\n{plugin.pluginName} - {plugin.pluginAuthor}";
+            }
+            SendPlayerChatMessage(player, message);
+        });
+        SetCommandDescription("plugins", "Shows all loaded plugins");
+    }
+
+    private List<WFPlayer> lastToUseChalk = new();
+    public override void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet)
+    {
+        base.onNetworkPacket(sender, packet);
+
+        object value;
+        if (packet.TryGetValue("type", out value))
+        {
+            if (typeof(string) != value.GetType()) return;
+
+            string type = value as string;
+            if (type == "chalk_packet")
+            {
+                lastToUseChalk.Add(sender);
+                if (lastToUseChalk.Count > 10)
+                {
+                    lastToUseChalk.RemoveAt(0);
+                }
+            }
+        }
+    }
+
+    public override void onEnd()
+    {
+        base.onEnd();
+
+        // unregister all commands
+        // this is needed to allow for the plugin to be reloaded!
+        UnregisterCommand("users");
+        UnregisterCommand("spawn");
+        UnregisterCommand("kick");
+        UnregisterCommand("ban");
+        UnregisterCommand("setjoinable");
+        UnregisterCommand("refreshadmins");
+        UnregisterCommand("uptime");
+        UnregisterCommand("say");
+        UnregisterCommand("chalkrecent");
+        UnregisterCommand("reload");
+        UnregisterCommand("plugins");
     }
 }

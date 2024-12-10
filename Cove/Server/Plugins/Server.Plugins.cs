@@ -9,21 +9,23 @@ namespace Cove.Server
         private bool arePluginsEnabled = false;
 
         public readonly List<PluginInstance> loadedPlugins = new List<PluginInstance>();
-        protected void loadAllPlugins()
+        public void loadAllPlugins(bool skipWarning = false)
         {
-
             if (!arePluginsEnabled) return; // plugins are disabled!
 
-            Log("");
-            Log("------------ WARNING ------------");
-            Log("YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE");
-            Log("ANY AND ALL DAMMAGE TO YOUR COMPUTER IS YOU AND YOUR FAULT ALONE");
-            Log("DO NOT RUN ANY UNTRUSTED PLUGINS!");
-            Log("IF YOU ARE RUNNING UNTRUSTED PLUGINS EXIT COVE NOW");
-            Log("------------ WARNING ------------");
-            Log("");
+            if (!skipWarning)
+            {
+                Log("");
+                Log("------------ WARNING ------------");
+                Log("YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE");
+                Log("ANY AND ALL DAMMAGE TO YOUR COMPUTER IS YOU AND YOUR FAULT ALONE");
+                Log("DO NOT RUN ANY UNTRUSTED PLUGINS!");
+                Log("IF YOU ARE RUNNING UNTRUSTED PLUGINS EXIT COVE NOW");
+                Log("------------ WARNING ------------");
+                Log("");
 
-            Thread.Sleep(5000);
+                Thread.Sleep(5000);
+            }
 
             Log("Loading Plugins...");
 
