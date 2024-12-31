@@ -27,6 +27,7 @@ using System.Diagnostics;
 using System.Text.Unicode;
 using System.Text;
 using System.Reflection;
+using System.Threading.Channels;
 
 namespace Cove.Server
 {
@@ -220,7 +221,7 @@ namespace Cove.Server
                 return;
             }
 
-            serverPlayer = new WFPlayer(SteamUser.GetSteamID(), SteamFriends.GetPersonaName());
+            serverPlayer = new WFPlayer(SteamUser.GetSteamID(), SteamFriends.GetPersonaName(), new SteamNetworkingIdentity());
 
             // thread for running steamworks callbacks
             cbThread.IsBackground = true;
@@ -270,7 +271,6 @@ namespace Cove.Server
                 SteamMatchmaking.SetLobbyData(SteamLobby, "banned_players", "");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "age_limit", ageRestricted ? "true" : "false");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "cap", MaxPlayers.ToString());
-                SteamNetworking.AllowP2PPacketRelay(true);
                 SteamMatchmaking.SetLobbyData(SteamLobby, "server_browser_value", "0");
                 Log("Lobby Created!");
                 Log($"Lobby Code: {LobbyCode}");
@@ -282,7 +282,6 @@ namespace Cove.Server
                 hostSpawnService.StartAsync(CancellationToken.None);
                 hostSpawnMetalService.StartAsync(CancellationToken.None);
 
-                listenSocket = SteamNetworkingSockets.CreateListenSocketP2P(0, 0, []);
             });
 
             Callback<LobbyChatUpdate_t>.Create((LobbyChatUpdate_t param) =>
@@ -321,46 +320,26 @@ namespace Cove.Server
                 }
             });
 
-            /*
-            Callback<P2PSessionRequest_t> callback = Callback<P2PSessionRequest_t>.Create((P2PSessionRequest_t param) =>
-            {
-
-                // get all members in the lobby
-                CSteamID[] members = getAllPlayers();
-                if (!members.Contains(param.m_steamIDRemote) && AllPlayers.Find(p => p.SteamId.m_SteamID == param.m_steamIDRemote.m_SteamID) == null)
-                {
-                    Log($"Got P2P request from {param.m_steamIDRemote}, but they are not in the lobby!");
-                    SteamNetworking.CloseP2PSessionWithUser(param.m_steamIDRemote);
-                    return;
-                }
-
-                if (isPlayerBanned(param.m_steamIDRemote))
-                {
-                    Log($"Got P2P request from {param.m_steamIDRemote}, but they are banned!");
-                    SteamNetworking.CloseP2PSessionWithUser(param.m_steamIDRemote);
-                    sendBlacklistPacketToAll(param.m_steamIDRemote.m_SteamID.ToString());
-                    return;
-                }
-
-                Log($"Accepting P2P request from {param.m_steamIDRemote}");
-                SteamNetworking.AcceptP2PSessionWithUser(param.m_steamIDRemote);
-            });
-            */
+            listenSocket = SteamNetworkingSockets.CreateListenSocketP2P(0, 0, []);
 
             Callback<SteamNetworkingMessagesSessionRequest_t>.Create((SteamNetworkingMessagesSessionRequest_t param) =>
             {
-                //Log("Got a session request from " + param.m_identityRemote.GetSteamID());
-                //SteamNetworkingSockets.AcceptConnection();
-            });
+                Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
+                SteamNetworkingMessages.AcceptSessionWithUser(ref param.m_identityRemote);
+                // get the players WFPlayer object
+                WFPlayer player = AllPlayers.Find(p => p.SteamId == param.m_identityRemote.GetSteamID());
+                if (player == null)
+                {
+                    Log("Player not found!");
+                    return;
+                }
 
-            Callback<SteamNetConnectionStatusChangedCallback_t>.Create((SteamNetConnectionStatusChangedCallback_t param) =>
-            {
-                Log("Connection status changed!");
-                Log(param.m_info.m_identityRemote.GetSteamID64().ToString());
+                player.identity = param.m_identityRemote; // update the players identity
             });
 
             Callback<LobbyChatMsg_t>.Create((LobbyChatMsg_t callback) =>
             {
+
                 CSteamID userId = (CSteamID)callback.m_ulSteamIDUser;
                 byte[] data = new byte[4096]; // Max size for a message
                 EChatEntryType chatEntryType;
@@ -391,39 +370,36 @@ namespace Cove.Server
                             // send a steamlobby chat message to the player
                             var rejectMessage = $"$weblobby_request_denied_deny-{userId.m_SteamID}";
                             var rejectData = Encoding.UTF8.GetBytes(rejectMessage);
-                            SteamMatchmaking.SendLobbyChatMsg(SteamLobby, rejectData, rejectData.Count());
+                            SteamMatchmaking.SendLobbyChatMsg(new CSteamID(callback.m_ulSteamIDLobby), rejectData, rejectData.Count());
                             return;
                         }
 
                         var acceptMessage = $"$weblobby_request_accepted-{userId.m_SteamID}";
                         var acceptData = Encoding.UTF8.GetBytes(acceptMessage);
-                        SteamMatchmaking.SendLobbyChatMsg(SteamLobby, acceptData, acceptData.Count());
+                        bool suc = SteamMatchmaking.SendLobbyChatMsg(new CSteamID(callback.m_ulSteamIDLobby), acceptData, acceptData.Count());
+                        Log($"sent?: {suc.ToString()}");
 
                         // make the player a wfplayer
-                        WFPlayer player = new WFPlayer(userId, SteamFriends.GetFriendPersonaName(userId));
+                        WFPlayer player = new WFPlayer(userId, SteamFriends.GetFriendPersonaName(userId), new SteamNetworkingIdentity());
                         AllPlayers.Add(player);
 
                         Dictionary<string, object> joinedPacket = new();
                         joinedPacket["type"] = "user_joined_weblobby";
-                        joinedPacket["user_id"] = userId.m_SteamID.ToString();
-                        //sendPacketToPlayers(joinedPacket);
+                        joinedPacket["user_id"] = (long)userId.m_SteamID;
+                        sendPacketToPlayers(joinedPacket);
 
                         Dictionary<string, object> membersPacket = new();
                         membersPacket["type"] = "receive_weblobby";
                         Dictionary<int, object> members = new();
 
-                        members[0] = serverPlayer.SteamId.m_SteamID.ToString();
+                        members[0] = (long)serverPlayer.SteamId.m_SteamID;
                         for (int i = 0; i < AllPlayers.Count; i++)
                         {
-                            members[i+1] = AllPlayers[i].SteamId.m_SteamID.ToString();
+                            members[i + 1] = (long)AllPlayers[i].SteamId.m_SteamID;
                         }
 
                         membersPacket["weblobby"] = userId.m_SteamID.ToString();
-                        //sendPacketToPlayers(membersPacket);
-
-                        // check if the p2p connection to the player is open
-                        SteamNetworking.GetP2PSessionState(userId, out P2PSessionState_t state);
-                        Log(state.m_bConnecting + " " + state.m_bConnectionActive + " " + state.m_bUsingRelay + " " + state.m_eP2PSessionError);
+                        sendPacketToPlayers(membersPacket);
                     }
                 }
             });
@@ -461,20 +437,11 @@ namespace Cove.Server
                 {
                     for (int i = 0; i < 6; i++)
                     {
-                        uint packetSize = 0;
-                        // we are going to check if there are any incoming net packets!
-                        if (SteamNetworking.IsP2PPacketAvailable(out packetSize, nChannel: i))
-                        {
-                            didWork = true;
-                            byte[] packet = new byte[packetSize];
-                            uint bytesRead = 0;
-                            CSteamID sender;
+                        List<Dictionary<string, object>> messages = ReceiveMessagesOnChannel(i, 10);
+                        if (messages.Count == 0)
+                            break;
 
-                            if (SteamNetworking.ReadP2PPacket(packet, packetSize, out bytesRead, out sender, nChannel: i))
-                            {
-                                OnNetworkPacket(packet, sender);
-                            }
-                        }
+                        Log($"Received {messages.Count} messages on channel {i}");
                     }
                 }
                 catch (Exception e)
