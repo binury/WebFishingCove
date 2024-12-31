@@ -87,26 +87,19 @@ namespace Cove.Server
 
         public List<Dictionary<string, object>> ReceiveMessagesOnChannel(int channel, int maxMessages)
         {
-            // Result list to store messages
             List<Dictionary<string, object>> messages = new List<Dictionary<string, object>>();
 
-            // Allocate space for message pointers
             nint[] messagePointers = new nint[maxMessages];
 
-            // Receive messages on the specified channel
             int availableMessages = SteamNetworkingMessages.ReceiveMessagesOnChannel(channel, messagePointers, maxMessages);
 
-            // Process each message
             for (int i = 0; i < availableMessages; i++)
             {
-                // Marshal the pointer into a managed structure
                 SteamNetworkingMessage_t message = Marshal.PtrToStructure<SteamNetworkingMessage_t>(messagePointers[i]);
 
-                // Extract data as a byte array
                 byte[] data = new byte[message.m_cbSize];
                 Marshal.Copy(message.m_pData, data, 0, message.m_cbSize);
 
-                // Create a dictionary for message info
                 Dictionary<string, object> msgDict = new Dictionary<string, object>
                 {
                     { "payload", data }, // Message payload
@@ -121,14 +114,10 @@ namespace Cove.Server
                     { "sender_user_data", (ulong)message.m_nUserData }
                 };
 
-                // Add the message dictionary to the list
                 messages.Add(msgDict);
-
-                // Release the message to free memory
-                message.Release();
+                SteamNetworkingMessage_t.Release(messagePointers[i]);
             }
 
-            // Return the processed messages
             return messages;
         }
 

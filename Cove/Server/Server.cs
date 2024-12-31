@@ -398,7 +398,7 @@ namespace Cove.Server
                             members[i + 1] = (long)AllPlayers[i].SteamId.m_SteamID;
                         }
 
-                        membersPacket["weblobby"] = userId.m_SteamID.ToString();
+                        membersPacket["weblobby"] = members;
                         sendPacketToPlayers(membersPacket);
                     }
                 }
