@@ -61,8 +61,9 @@ namespace Cove.Server
         public List<WFActor> serverOwnedInstances = new();
         public List<WFActor> allActors = new();
 
-        public WFPlayer serverPlayer;
+        private HSteamListenSocket listenSocket;
 
+        public WFPlayer serverPlayer;
 
         Thread cbThread;
         Thread networkThread;
@@ -281,6 +282,7 @@ namespace Cove.Server
                 hostSpawnService.StartAsync(CancellationToken.None);
                 hostSpawnMetalService.StartAsync(CancellationToken.None);
 
+                listenSocket = SteamNetworkingSockets.CreateListenSocketP2P(0, 0, []);
             });
 
             Callback<LobbyChatUpdate_t>.Create((LobbyChatUpdate_t param) =>
@@ -319,6 +321,7 @@ namespace Cove.Server
                 }
             });
 
+            /*
             Callback<P2PSessionRequest_t> callback = Callback<P2PSessionRequest_t>.Create((P2PSessionRequest_t param) =>
             {
 
@@ -341,6 +344,19 @@ namespace Cove.Server
 
                 Log($"Accepting P2P request from {param.m_steamIDRemote}");
                 SteamNetworking.AcceptP2PSessionWithUser(param.m_steamIDRemote);
+            });
+            */
+
+            Callback<SteamNetworkingMessagesSessionRequest_t>.Create((SteamNetworkingMessagesSessionRequest_t param) =>
+            {
+                //Log("Got a session request from " + param.m_identityRemote.GetSteamID());
+                //SteamNetworkingSockets.AcceptConnection();
+            });
+
+            Callback<SteamNetConnectionStatusChangedCallback_t>.Create((SteamNetConnectionStatusChangedCallback_t param) =>
+            {
+                Log("Connection status changed!");
+                Log(param.m_info.m_identityRemote.GetSteamID64().ToString());
             });
 
             Callback<LobbyChatMsg_t>.Create((LobbyChatMsg_t callback) =>
@@ -390,7 +406,7 @@ namespace Cove.Server
                         Dictionary<string, object> joinedPacket = new();
                         joinedPacket["type"] = "user_joined_weblobby";
                         joinedPacket["user_id"] = userId.m_SteamID.ToString();
-                        sendPacketToPlayers(joinedPacket);
+                        //sendPacketToPlayers(joinedPacket);
 
                         Dictionary<string, object> membersPacket = new();
                         membersPacket["type"] = "receive_weblobby";
@@ -403,7 +419,7 @@ namespace Cove.Server
                         }
 
                         membersPacket["weblobby"] = userId.m_SteamID.ToString();
-                        sendPacketToPlayers(membersPacket);
+                        //sendPacketToPlayers(membersPacket);
 
                         // check if the p2p connection to the player is open
                         SteamNetworking.GetP2PSessionState(userId, out P2PSessionState_t state);
