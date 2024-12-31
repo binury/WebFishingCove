@@ -24,6 +24,8 @@ using Microsoft.Extensions.Logging;
 using Vector3 = Cove.GodotFormat.Vector3;
 using Serilog;
 using System.Diagnostics;
+using System.Text.Unicode;
+using System.Text;
 
 namespace Cove.Server
 {
@@ -302,6 +304,17 @@ namespace Cove.Server
                     // if player is in connectionsQueued, remove them
                     if (connectionsQueued.Contains(userChanged))
                         connectionsQueued.Remove(userChanged);
+
+                    // if player is in AllPlayers, remove them
+                    if (!connectionsQueued.Contains(userChanged))
+                    {
+                        WFPlayer player = AllPlayers.Find(p => p.SteamId == userChanged);
+                        if (player != null)
+                        {
+                            AllPlayers.Remove(player);
+                            Log($"{player.Username} disconnected!");
+                        }
+                    }
                 }
             });
 
@@ -346,14 +359,27 @@ namespace Cove.Server
 
                 if (messageLength > 0)
                 {
-                    string message = System.Text.Encoding.UTF8.GetString(data, 0, messageLength);
-                    Log($"Message from {userId}: {message}");
+                    string lobbyMessage = Encoding.UTF8.GetString(data, 0, messageLength);
+                    Log($"Message from {userId}: {lobbyMessage}");
+                    Log($"\"{lobbyMessage}\"");
 
-                    if (message == "$weblobby_join_request")
+                    if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
                     {
+                        Log($"Player {userId} is trying to join the lobby!");
+                        // check if the user is banned 
+                        if (isPlayerBanned(userId))
+                        {
+                            Log($"Player {userId} tried to join, but they are banned!");
+                            // send a steamlobby chat message to the player
+                            var rejectMessage = $"$weblobby_request_denied_deny-{userId.m_SteamID}";
+                            Log(rejectMessage);
+                            var rejectData = Encoding.UTF8.GetBytes(rejectMessage);
+                            SteamMatchmaking.SendLobbyChatMsg(SteamLobby, rejectData, rejectData.Count());
+                            return;
+                        }
+
 
                     }
-
                 }
             });
 
