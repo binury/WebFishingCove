@@ -53,11 +53,13 @@ namespace Cove.Server
         List<string> Admins = new();
         public CSteamID SteamLobby;
 
+        public List<CSteamID> connectionsQueued = new();
         public List<WFPlayer> AllPlayers = new();
         public List<WFActor> serverOwnedInstances = new();
         public List<WFActor> allActors = new();
 
         public WFPlayer serverPlayer;
+
 
         Thread cbThread;
         Thread networkThread;
@@ -280,7 +282,7 @@ namespace Cove.Server
 
             Callback<LobbyChatUpdate_t>.Create((LobbyChatUpdate_t param) =>
             {
-
+                /*
                 CSteamID lobbyID = new CSteamID(param.m_ulSteamIDLobby);
 
                 CSteamID userChanged = new CSteamID(param.m_ulSteamIDUserChanged);
@@ -345,6 +347,7 @@ namespace Cove.Server
                     AllPlayers.Remove(leavingPlayer);
                     allActors.RemoveAll(a => a.owner.m_SteamID == userChanged.m_SteamID);
                 }
+                */
             });
 
             Callback<P2PSessionRequest_t> callback = Callback<P2PSessionRequest_t>.Create((P2PSessionRequest_t param) =>
