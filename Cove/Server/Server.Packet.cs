@@ -29,6 +29,8 @@ namespace Cove.Server
         {
             Dictionary<string, object> packetInfo = readPacket(GzipHelper.DecompressGzip(packet));
 
+           printStringDict(packetInfo); // print the packet info to the console
+
             // just in case!
             if (isPlayerBanned(sender))
                 banPlayer(sender);

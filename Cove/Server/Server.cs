@@ -23,6 +23,7 @@ using Cove.Server.HostedServices;
 using Microsoft.Extensions.Logging;
 using Vector3 = Cove.GodotFormat.Vector3;
 using Serilog;
+using System.Diagnostics;
 
 namespace Cove.Server
 {
@@ -30,7 +31,7 @@ namespace Cove.Server
     {
         public Serilog.Core.Logger logger;
 
-        public readonly string WebFishingGameVersion = "1.1"; // make sure to update this when the game updates!
+        public readonly string WebFishingGameVersion = "1.11"; // make sure to update this when the game updates!
         public int MaxPlayers = 20;
         public string ServerName = "A Cove Dedicated Server";
         public string LobbyCode = new string(Enumerable.Range(0, 5).Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)]).ToArray());
@@ -367,6 +368,35 @@ namespace Cove.Server
                 }
 
                 SteamNetworking.AcceptP2PSessionWithUser(param.m_steamIDRemote);
+            });
+
+            Callback<LobbyChatMsg_t>.Create((LobbyChatMsg_t callback) =>
+            {
+                CSteamID userId = (CSteamID)callback.m_ulSteamIDUser;
+                byte[] data = new byte[4096]; // Max size for a message
+                EChatEntryType chatEntryType;
+
+                // Retrieve the message
+                int messageLength = SteamMatchmaking.GetLobbyChatEntry(
+                    (CSteamID)callback.m_ulSteamIDLobby,
+                    (int)callback.m_iChatID,
+                    out userId,
+                    data,
+                    data.Length,
+                    out chatEntryType
+                );
+
+                if (messageLength > 0)
+                {
+                    string message = System.Text.Encoding.UTF8.GetString(data, 0, messageLength);
+                    Log($"Message from {userId}: {message}");
+
+                    if (message == "$weblobby_join_request")
+                    {
+
+                    }
+
+                }
             });
 
             if (friendsOnly)
