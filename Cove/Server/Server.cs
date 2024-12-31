@@ -282,7 +282,6 @@ namespace Cove.Server
 
             Callback<LobbyChatUpdate_t>.Create((LobbyChatUpdate_t param) =>
             {
-                /*
                 CSteamID lobbyID = new CSteamID(param.m_ulSteamIDLobby);
 
                 CSteamID userChanged = new CSteamID(param.m_ulSteamIDUserChanged);
@@ -293,61 +292,17 @@ namespace Cove.Server
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
 
-                    if (!isPlayerBanned(userChanged))
-                    {
-                        Log($"{Username} [{userChanged.m_SteamID}] has joined the game!");
-                        updatePlayercount();
-                    }
-
-                    if (AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID) != null)
-                    {
-                        if (showBotRejoins)
-                            Log($"{Username} is already in the server, rejecting");
-
-                        sendBlacklistPacketToAll(userChanged.m_SteamID.ToString()); // tell players to blacklist the player
-                        return; // player is already in the server, dont add them again
-                    }
-
-                    WFPlayer newPlayer = new WFPlayer(userChanged, Username);
-                    AllPlayers.Add(newPlayer);
-
-                    foreach (PluginInstance p in loadedPlugins)
-                    {
-                        p.plugin.onPlayerJoin(newPlayer);
-                    }
-
-                    // check if the player is banned
-                    if (isPlayerBanned(userChanged))
-                        sendBlacklistPacketToAll(userChanged.m_SteamID.ToString()); // tell all players to blacklist the banned player
-
-                    if (userChanged.m_SteamID == SteamUser.GetSteamID().m_SteamID)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Log("The account running the server has joined the game!");
-                        Log("This will cause issues, please run the server on a different account!");
-                        Console.ResetColor();
-                    }
+                    connectionsQueued.Add(userChanged);
                 }
 
                 if (stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeLeft) || stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeDisconnected))
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
 
-                    if (!isPlayerBanned(userChanged))
-                    {
-                        Log($"{Username} [{userChanged.m_SteamID}] has left the game!");
-                        updatePlayercount();
-                    }
-
-                    WFPlayer leavingPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == userChanged.m_SteamID);
-                    foreach (PluginInstance plugin in loadedPlugins)
-                    {
-                        plugin.plugin.onPlayerLeave(leavingPlayer);
-                    }
-                    AllPlayers.Remove(leavingPlayer);
-                    allActors.RemoveAll(a => a.owner.m_SteamID == userChanged.m_SteamID);
+                    // if player is in connectionsQueued, remove them
+                    if (connectionsQueued.Contains(userChanged))
+                        connectionsQueued.Remove(userChanged);
                 }
-                */
             });
 
             Callback<P2PSessionRequest_t> callback = Callback<P2PSessionRequest_t>.Create((P2PSessionRequest_t param) =>
