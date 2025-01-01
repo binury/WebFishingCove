@@ -29,8 +29,6 @@ namespace Cove.Server
         {
             Dictionary<string, object> packetInfo = readPacket(GzipHelper.DecompressGzip(packet));
 
-           printStringDict(packetInfo); // print the packet info to the console
-
             // just in case!
             if (isPlayerBanned(sender))
                 banPlayer(sender);
@@ -101,6 +99,10 @@ namespace Cove.Server
                             {
                                 thisPlayer.InstanceID = actorID;
                                 allActors.Add(thisPlayer); // add the player to the actor list
+
+                                // print out a join message
+                                Log($"[{thisPlayer.SteamId.m_SteamID}] {thisPlayer.Username} joined the server");
+
                             }
 
                         } else {

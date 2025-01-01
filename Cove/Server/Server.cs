@@ -314,7 +314,16 @@ namespace Cove.Server
                         if (player != null)
                         {
                             AllPlayers.Remove(player);
-                            Log($"{player.Username} disconnected!");
+                            Log($"[{player.SteamId.m_SteamID}] {player.Username} has left the game!");
+
+                            Dictionary<string, object> leftPacket = new();
+                            leftPacket["type"] = "user_left_weblobby";
+                            leftPacket["user_id"] = (long)player.SteamId.m_SteamID;
+                            leftPacket["reason"] = (int)0;
+                            sendPacketToPlayers(leftPacket);
+
+                            SteamNetworkingMessages.CloseSessionWithUser(ref player.identity);
+
                         }
                     }
                 }
@@ -325,7 +334,6 @@ namespace Cove.Server
             Callback<SteamNetworkingMessagesSessionRequest_t>.Create((SteamNetworkingMessagesSessionRequest_t param) =>
             {
                 Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
-                SteamNetworkingMessages.AcceptSessionWithUser(ref param.m_identityRemote);
                 // get the players WFPlayer object
                 WFPlayer player = AllPlayers.Find(p => p.SteamId == param.m_identityRemote.GetSteamID());
                 if (player == null)
@@ -333,6 +341,8 @@ namespace Cove.Server
                     Log("Player not found!");
                     return;
                 }
+
+                SteamNetworkingMessages.AcceptSessionWithUser(ref param.m_identityRemote);
 
                 player.identity = param.m_identityRemote; // update the players identity
             });
@@ -362,7 +372,11 @@ namespace Cove.Server
 
                     if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
                     {
-                        Log($"Player {userId} is trying to join the lobby!");
+                        if (!AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
+                        {
+                            Log($"Player {userId} is trying to join the lobby!");
+                        }
+
                         // check if the user is banned 
                         if (isPlayerBanned(userId))
                         {
@@ -440,7 +454,7 @@ namespace Cove.Server
                         if (messages.Count == 0)
                             break;
 
-                        Log($"Received {messages.Count} messages on channel {i}");
+                        //Log($"Received {messages.Count} messages on channel {i}");
                         for (int j = 0; j < messages.Count; j++)
                         {
                             // print every attribute of the message
