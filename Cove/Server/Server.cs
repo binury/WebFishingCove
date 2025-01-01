@@ -77,6 +77,8 @@ namespace Cove.Server
         Dictionary<string, IHostedService> services = new();
         public readonly object serverActorListLock = new();
 
+        public List<string> WantedTags = new();
+
         public void Init()
         {
             cbThread = new(runSteamworksUpdate);
@@ -187,6 +189,16 @@ namespace Cove.Server
                         showBotRejoins = getBoolFromString(config[key]);
                         break;
 
+                    case "tags":
+                        var tags = config[key].Split(',');
+                        // remove trailing whitespace from the tags
+                        for (int i = 0; i < tags.Length; i++)
+                        {
+                            tags[i] = tags[i].Trim().ToLower();
+                        }
+                        WantedTags = tags.ToList();
+                        break;
+
                     case "skibidi":
                         Log("Dop dop, yes yes");
                         break;
@@ -292,7 +304,10 @@ namespace Cove.Server
                 string[] LOBBY_TAGS = ["talkative", "quiet", "grinding", "chill", "silly", "hardcore", "mature", "modded"];
                 for (int i = 0; i < LOBBY_TAGS.Length; i++)
                 {
-                    SteamMatchmaking.SetLobbyData(SteamLobby, $"tag_{LOBBY_TAGS[i]}", "0");
+                    bool wantedTag = WantedTags.Contains(LOBBY_TAGS[i]);
+                    SteamMatchmaking.SetLobbyData(SteamLobby, $"tag_{LOBBY_TAGS[i]}", wantedTag ? "1" : "0");
+                    if (wantedTag)
+                        Log($"Added tag: {LOBBY_TAGS[i]}");
                 }
 
                 ulong epoch = (ulong)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
