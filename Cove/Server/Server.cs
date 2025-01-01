@@ -263,15 +263,16 @@ namespace Cove.Server
             Callback<LobbyCreated_t>.Create((LobbyCreated_t param) =>
             {
                 SteamLobby = new CSteamID(param.m_ulSteamIDLobby);
+                SteamMatchmaking.SetLobbyJoinable(SteamLobby, true);
                 SteamMatchmaking.SetLobbyData(SteamLobby, "ref", "webfishing_gamelobby");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "version", WebFishingGameVersion);
                 SteamMatchmaking.SetLobbyData(SteamLobby, "code", LobbyCode);
-                SteamMatchmaking.SetLobbyData(SteamLobby, "type", codeOnly ? "code_only" : "public");
-                SteamMatchmaking.SetLobbyData(SteamLobby, "public", "true");
-                SteamMatchmaking.SetLobbyData(SteamLobby, "banned_players", "");
-                SteamMatchmaking.SetLobbyData(SteamLobby, "age_limit", ageRestricted ? "true" : "false");
+                SteamMatchmaking.SetLobbyData(SteamLobby, "type", "0");
+                SteamMatchmaking.SetLobbyData(SteamLobby, "public", codeOnly ? "false" : "true");
+                SteamMatchmaking.SetLobbyData(SteamLobby, "request", "false"); // make this a option later down the line
                 SteamMatchmaking.SetLobbyData(SteamLobby, "cap", MaxPlayers.ToString());
-                SteamMatchmaking.SetLobbyData(SteamLobby, "server_browser_value", "0");
+                SteamMatchmaking.SetLobbyData(SteamLobby, "count", "1");
+
                 Log("Lobby Created!");
                 Log($"Lobby Code: {LobbyCode}");
                 // set the player count in the title
@@ -281,6 +282,27 @@ namespace Cove.Server
                 actorUpdateService.StartAsync(CancellationToken.None);
                 hostSpawnService.StartAsync(CancellationToken.None);
                 hostSpawnMetalService.StartAsync(CancellationToken.None);
+
+                SteamMatchmaking.SetLobbyData(SteamLobby, "server_browser_value", "0");
+
+                string[] LOBBY_TAGS = ["talkative", "quiet", "grinding", "chill", "silly", "hardcore", "mature", "modded"];
+                for (int i = 0; i < LOBBY_TAGS.Length; i++)
+                {
+                    SteamMatchmaking.SetLobbyData(SteamLobby, $"tag_{LOBBY_TAGS[i]}", "0");
+                }
+
+                ulong epoch = (ulong)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+                SteamMatchmaking.SetLobbyData(SteamLobby, "timestamp", epoch.ToString());
+
+                /*
+                int dataCount = SteamMatchmaking.GetLobbyDataCount(SteamLobby);
+                for (int j = 0; j < dataCount; j++)
+                {
+                    string key, value;
+                    SteamMatchmaking.GetLobbyDataByIndex(SteamLobby, j, out key, 100, out value, 100);
+                    Log($"{key}: {value}");
+                }
+                */
 
             });
 
@@ -377,8 +399,6 @@ namespace Cove.Server
                 if (messageLength > 0)
                 {
                     string lobbyMessage = Encoding.UTF8.GetString(data, 0, messageLength);
-                    //Log($"Message from {userId}: {lobbyMessage}");
-                    //Log($"\"{lobbyMessage}\"");
 
                     if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
                     {
@@ -387,8 +407,6 @@ namespace Cove.Server
                             sendWebLobbyPacket(userId);
                             return;
                         }
-
-                        //Log($"Player {userId} is trying to join the lobby!");
 
                         // check if the user is banned 
                         if (isPlayerBanned(userId))
@@ -435,6 +453,7 @@ namespace Cove.Server
             else
                 SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, MaxPlayers);
         }
+
         private bool getBoolFromString(string str)
         {
             if (str.ToLower() == "true")

@@ -332,7 +332,7 @@ namespace Cove.Server
 
             SteamMatchmaking.SetLobbyData(SteamLobby, "lobby_name", serverName);
             SteamMatchmaking.SetLobbyData(SteamLobby, "name", serverName);
-            SteamMatchmaking.SetLobbyData(SteamLobby, "player_count", $"{SteamMatchmaking.GetNumLobbyMembers(SteamLobby)}");
+            SteamMatchmaking.SetLobbyData(SteamLobby, "count", (AllPlayers.Count + 1).ToString());
         }
 
         public void disconnectAllPlayers()

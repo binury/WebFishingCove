@@ -69,6 +69,14 @@ namespace Cove.Server.HostedServices
             // remove old instances!
             try
             {
+
+                // if we are in a lobby, update the player count
+                if (server.SteamLobby.m_SteamID != 0)
+                {
+                    ulong epoch = (ulong)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+                    SteamMatchmaking.SetLobbyData(server.SteamLobby, "timestamp", epoch.ToString());
+                }
+
                 lock (server.serverActorListLock)
                 {
                     foreach (WFActor inst in server.serverOwnedInstances.ToList())
