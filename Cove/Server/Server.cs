@@ -490,6 +490,8 @@ namespace Cove.Server
                         if (messages.Count == 0)
                             break;
 
+                        didWork = true;
+
                         //Log($"Received {messages.Count} messages on channel {i}");
                         for (int j = 0; j < messages.Count; j++)
                         {
