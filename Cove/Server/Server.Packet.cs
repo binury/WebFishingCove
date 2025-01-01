@@ -102,7 +102,8 @@ namespace Cove.Server
 
                                 // print out a join message
                                 Log($"[{thisPlayer.SteamId.m_SteamID}] {thisPlayer.Username} joined the server");
-
+                                sendWebLobbyPacket(thisPlayer.SteamId);
+                                updatePlayercount();
                             }
 
                         } else {
