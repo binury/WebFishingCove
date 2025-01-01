@@ -1,14 +1,8 @@
 ﻿> [!NOTE]  
-> ## Cove 1.0! 🥳
-> As of WebFishing v1.09 cove implements all fetures from the main game making it a parallel experience compared to the actual game!
+> It works :D
 
 # Webfishing Cove
 Cove is a dedicated server for WebFishing written in C#!
-
-> [!IMPORTANT]  
-> Cove is very new, there will be unexpected bugs! 
->
-> If you encounter any large issues or bugs please let me know!
 
 Cove is a implementation of the WebFishing network protocall in a CLI meaning it dosent require Godot or anything other than Steamworks!
 
@@ -57,12 +51,16 @@ If you have any questions or issues with Cove, **create and issue on Github** or
 	- Run the server EXE and enjoy! 
 	- Please be respectful and dont name the servers anything stupid!
 
+5. Look below
+	- Links if you wanna find plugins or make them are below!
 	 
 # Other info
 
 Some default / popular plugins can be found in the [CovePlugins](https://github.com/DrMeepso/CovePlugins) repo
 
 The repo for a template plugin can be found here: [CovePluginTemplate](https://github.com/DrMeepso/TemplateCovePlugin)
+
+More plugins can be found in the discord server for cove listed above!
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/E1E0E65CR)
 
