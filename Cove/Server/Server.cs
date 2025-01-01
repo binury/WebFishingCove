@@ -357,7 +357,7 @@ namespace Cove.Server
                 if (messageLength > 0)
                 {
                     string lobbyMessage = Encoding.UTF8.GetString(data, 0, messageLength);
-                    Log($"Message from {userId}: {lobbyMessage}");
+                    //Log($"Message from {userId}: {lobbyMessage}");
                     //Log($"\"{lobbyMessage}\"");
 
                     if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
@@ -377,7 +377,6 @@ namespace Cove.Server
                         var acceptMessage = $"$weblobby_request_accepted-{userId.m_SteamID}";
                         var acceptData = Encoding.UTF8.GetBytes(acceptMessage);
                         bool suc = SteamMatchmaking.SendLobbyChatMsg(new CSteamID(callback.m_ulSteamIDLobby), acceptData, acceptData.Count());
-                        Log($"sent?: {suc.ToString()}");
 
                         // make the player a wfplayer
                         WFPlayer player = new WFPlayer(userId, SteamFriends.GetFriendPersonaName(userId), new SteamNetworkingIdentity());
@@ -437,11 +436,17 @@ namespace Cove.Server
                 {
                     for (int i = 0; i < 6; i++)
                     {
-                        List<Dictionary<string, object>> messages = ReceiveMessagesOnChannel(i, 10);
+                        List<NetworkingMessage> messages = ReceiveMessagesOnChannel(i, 10);
                         if (messages.Count == 0)
                             break;
 
                         Log($"Received {messages.Count} messages on channel {i}");
+                        for (int j = 0; j < messages.Count; j++)
+                        {
+                            // print every attribute of the message
+                            //Log($"Message {j}:{messages[j].identity}");
+                            OnNetworkPacket(messages[j].payload, new CSteamID(messages[j].identity));
+                        }
                     }
                 }
                 catch (Exception e)

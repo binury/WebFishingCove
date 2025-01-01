@@ -85,9 +85,23 @@ namespace Cove.Server
             return players;
         }
 
-        public List<Dictionary<string, object>> ReceiveMessagesOnChannel(int channel, int maxMessages)
+        public class NetworkingMessage
         {
-            List<Dictionary<string, object>> messages = new List<Dictionary<string, object>>();
+            public byte[] payload { get; set; }
+            public int size { get; set; }
+            //public CSteamID connection { get; set; }
+            public ulong identity { get; set; }
+            public ulong receiver_user_data { get; set; }
+            public ulong time_received { get; set; }
+            public ulong message_number { get; set; }
+            public int channel { get; set; }
+            public int flags { get; set; }
+            public ulong sender_user_data { get; set; }
+        }
+
+        public List<NetworkingMessage> ReceiveMessagesOnChannel(int channel, int maxMessages)
+        {
+            List<NetworkingMessage> messages = new List<NetworkingMessage>();
 
             nint[] messagePointers = new nint[maxMessages];
 
@@ -100,6 +114,7 @@ namespace Cove.Server
                 byte[] data = new byte[message.m_cbSize];
                 Marshal.Copy(message.m_pData, data, 0, message.m_cbSize);
 
+                /*
                 Dictionary<string, object> msgDict = new Dictionary<string, object>
                 {
                     { "payload", data }, // Message payload
@@ -112,6 +127,21 @@ namespace Cove.Server
                     { "channel", message.m_nChannel },
                     { "flags", message.m_nFlags },
                     { "sender_user_data", (ulong)message.m_nUserData }
+                }
+                */
+
+                NetworkingMessage msgDict = new()
+                {
+                    payload = data,
+                    size = message.m_cbSize,
+                    //connection = ((uint)message.m_conn),
+                    identity = GetSteamIDFromIdentity(message.m_identityPeer),
+                    receiver_user_data = (ulong)message.m_nConnUserData,
+                    time_received = (ulong)message.m_usecTimeReceived.m_SteamNetworkingMicroseconds,
+                    message_number = (ulong)message.m_nMessageNumber,
+                    channel = message.m_nChannel,
+                    flags = message.m_nFlags,
+                    sender_user_data = (ulong)message.m_nUserData
                 };
 
                 messages.Add(msgDict);
