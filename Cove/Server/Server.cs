@@ -35,7 +35,7 @@ namespace Cove.Server
     {
         public Serilog.Core.Logger logger;
 
-        public readonly string WebFishingGameVersion = "1.12"; // make sure to update this when the game updates!
+        public string WebFishingGameVersion = "1.12"; // make sure to update this when the game updates!
         public int MaxPlayers = 20;
         public string ServerName = "A Cove Dedicated Server";
         public string LobbyCode = new string(Enumerable.Range(0, 5).Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)]).ToArray());
@@ -146,7 +146,7 @@ namespace Cove.Server
                         break;
 
                     case "gameVersion":
-                        //WebFishingGameVersion = config[key];
+                        WebFishingGameVersion = config[key];
                         break;
 
                     case "ageRestricted":
