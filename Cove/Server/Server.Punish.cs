@@ -70,14 +70,14 @@ namespace Cove.Server
 
         public void kickPlayer(CSteamID id)
         {
-            Dictionary<string, object> kickPacket = new();
-            kickPacket["type"] = "client_was_kicked";
-            sendPacketToPlayer(kickPacket, id);
-
             Dictionary<string, object> leftPacket = new();
             leftPacket["type"] = "peer_was_kicked";
             leftPacket["user_id"] = (long)id.m_SteamID;
             sendPacketToPlayers(leftPacket);
+
+            Dictionary<string, object> kickPacket = new();
+            kickPacket["type"] = "client_was_kicked";
+            sendPacketToPlayer(kickPacket, id);
         }
 
     }
