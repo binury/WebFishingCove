@@ -361,5 +361,22 @@ namespace Cove.Server
             PluginInstance pluginInfo = loadedPlugins.Find(i => i.plugin == caller);
             Log($"[{pluginInfo.pluginName}] {message}");
         }
+
+        public void sendWebLobbyPacket(CSteamID player)
+        {
+            // we have to make sure this gets to the client or it will reject all packets from every other player...
+            Dictionary<string, object> localMembersPacket = new();
+            localMembersPacket["type"] = "receive_weblobby";
+            Dictionary<int, object> localMembers = new();
+
+            localMembers[0] = (long)serverPlayer.SteamId.m_SteamID;
+            for (int i = 0; i < AllPlayers.Count; i++)
+            {
+                localMembers[i + 1] = (long)AllPlayers[i].SteamId.m_SteamID;
+            }
+
+            localMembersPacket["weblobby"] = localMembers;
+            sendPacketToPlayer(localMembersPacket, player);
+        }
     }
 }

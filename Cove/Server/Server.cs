@@ -323,7 +323,7 @@ namespace Cove.Server
                             sendPacketToPlayers(leftPacket);
 
                             SteamNetworkingMessages.CloseSessionWithUser(ref player.identity);
-
+                            updatePlayercount();
                         }
                     }
                 }
@@ -333,16 +333,26 @@ namespace Cove.Server
 
             Callback<SteamNetworkingMessagesSessionRequest_t>.Create((SteamNetworkingMessagesSessionRequest_t param) =>
             {
-                Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
+
+                // if the player is banned reject the session request
+                if (isPlayerBanned(new CSteamID(param.m_identityRemote.GetSteamID64())))
+                {
+                    SteamNetworkingMessages.CloseSessionWithUser(ref param.m_identityRemote);
+                    return;
+                }
+
+                //Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
                 // get the players WFPlayer object
                 WFPlayer player = AllPlayers.Find(p => p.SteamId == param.m_identityRemote.GetSteamID());
                 if (player == null)
                 {
-                    Log("Player not found!");
+                    //Log("Player not found!");
+                    SteamNetworkingMessages.CloseSessionWithUser(ref param.m_identityRemote);
                     return;
                 }
 
                 SteamNetworkingMessages.AcceptSessionWithUser(ref param.m_identityRemote);
+                sendWebLobbyPacket(new CSteamID(param.m_identityRemote.GetSteamID64()));
 
                 player.identity = param.m_identityRemote; // update the players identity
             });
@@ -372,15 +382,18 @@ namespace Cove.Server
 
                     if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
                     {
-                        if (!AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
+                        if (AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
                         {
-                            Log($"Player {userId} is trying to join the lobby!");
+                            sendWebLobbyPacket(userId);
+                            return;
                         }
+
+                        //Log($"Player {userId} is trying to join the lobby!");
 
                         // check if the user is banned 
                         if (isPlayerBanned(userId))
                         {
-                            Log($"Player {userId} tried to join, but they are banned!");
+                            //Log($"Player {userId} tried to join, but they are banned!");
                             // send a steamlobby chat message to the player
                             var rejectMessage = $"$weblobby_request_denied_deny-{userId.m_SteamID}";
                             var rejectData = Encoding.UTF8.GetBytes(rejectMessage);
@@ -450,7 +463,7 @@ namespace Cove.Server
                 {
                     for (int i = 0; i < 6; i++)
                     {
-                        List<NetworkingMessage> messages = ReceiveMessagesOnChannel(i, 10);
+                        List<NetworkingMessage> messages = ReceiveMessagesOnChannel(i, 50);
                         if (messages.Count == 0)
                             break;
 
@@ -482,6 +495,7 @@ namespace Cove.Server
             Log("Server was told to stop.");
             Dictionary<string, object> closePacket = new();
             closePacket["type"] = "server_close";
+            sendPacketToPlayers(closePacket);
 
             loadedPlugins.ForEach(plugin => plugin.plugin.onEnd()); // tell all plugins that the server is closing!
 
