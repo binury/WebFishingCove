@@ -367,7 +367,6 @@ namespace Cove.Server
                     return;
                 }
 
-                //Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
                 // get the players WFPlayer object
                 WFPlayer player = AllPlayers.Find(p => p.SteamId == param.m_identityRemote.GetSteamID());
                 if (player == null)
@@ -404,7 +403,8 @@ namespace Cove.Server
                 {
                     string lobbyMessage = Encoding.UTF8.GetString(data, 0, messageLength);
 
-                    if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
+                    // man i dont fucking know anymore
+                    if (String.Compare("$weblobby_join_request", lobbyMessage) == 0 || lobbyMessage.Trim() == "$weblobby_join_request")
                     {
                         if (AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
                         {
@@ -491,16 +491,13 @@ namespace Cove.Server
                             break;
 
                         didWork = true;
-
-                        //Log($"Received {messages.Count} messages on channel {i}");
                         for (int j = 0; j < messages.Count; j++)
                         {
-                            // print every attribute of the message
-                            //Log($"Message {j}:{messages[j].identity}");
                             OnNetworkPacket(messages[j].payload, new CSteamID(messages[j].identity));
                         }
                     }
                 }
+
                 catch (Exception e)
                 {
                     if (!showErrorMessages)
@@ -548,6 +545,7 @@ namespace Cove.Server
             {
                 string command = message.Split(' ')[0].Substring(1);
                 string[] args = message.Split(' ').Skip(1).ToArray();
+
                 if (DoseCommandExist(command))
                 {
                     InvokeCommand(sender, command, args);
