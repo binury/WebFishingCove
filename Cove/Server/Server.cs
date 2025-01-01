@@ -77,6 +77,8 @@ namespace Cove.Server
         Dictionary<string, IHostedService> services = new();
         public readonly object serverActorListLock = new();
 
+        public List<string> WantedTags = new();
+
         public void Init()
         {
             cbThread = new(runSteamworksUpdate);
@@ -187,6 +189,20 @@ namespace Cove.Server
                         showBotRejoins = getBoolFromString(config[key]);
                         break;
 
+                    case "tags":
+                        var tags = config[key].Split(',');
+                        // remove trailing whitespace from the tags
+                        for (int i = 0; i < tags.Length; i++)
+                        {
+                            tags[i] = tags[i].Trim().ToLower();
+                        }
+                        WantedTags = tags.ToList();
+                        break;
+
+                    case "skibidi":
+                        Log("Dop dop dop, yes yes");
+                        break;
+
                     default:
                         Log($"\"{key}\" is not a supported config option!");
                         continue;
@@ -288,7 +304,10 @@ namespace Cove.Server
                 string[] LOBBY_TAGS = ["talkative", "quiet", "grinding", "chill", "silly", "hardcore", "mature", "modded"];
                 for (int i = 0; i < LOBBY_TAGS.Length; i++)
                 {
-                    SteamMatchmaking.SetLobbyData(SteamLobby, $"tag_{LOBBY_TAGS[i]}", "0");
+                    bool wantedTag = WantedTags.Contains(LOBBY_TAGS[i]);
+                    SteamMatchmaking.SetLobbyData(SteamLobby, $"tag_{LOBBY_TAGS[i]}", wantedTag ? "1" : "0");
+                    if (wantedTag)
+                        Log($"Added tag: {LOBBY_TAGS[i]}");
                 }
 
                 ulong epoch = (ulong)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
@@ -346,6 +365,10 @@ namespace Cove.Server
 
                             SteamNetworkingMessages.CloseSessionWithUser(ref player.identity);
                             updatePlayercount();
+
+                            // tell all plugins that the player left
+                            loadedPlugins.ForEach(plugin => plugin.plugin.onPlayerLeave(player));
+
                         }
                     }
                 }
@@ -363,7 +386,6 @@ namespace Cove.Server
                     return;
                 }
 
-                //Log($"Accepting session request from {param.m_identityRemote.GetSteamID64().ToString()}");
                 // get the players WFPlayer object
                 WFPlayer player = AllPlayers.Find(p => p.SteamId == param.m_identityRemote.GetSteamID());
                 if (player == null)
@@ -400,7 +422,8 @@ namespace Cove.Server
                 {
                     string lobbyMessage = Encoding.UTF8.GetString(data, 0, messageLength);
 
-                    if (String.Compare("$weblobby_join_request", lobbyMessage) == 0)
+                    // man i dont fucking know anymore
+                    if (String.Compare("$weblobby_join_request", lobbyMessage) == 0 || lobbyMessage.Trim() == "$weblobby_join_request")
                     {
                         if (AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
                         {
@@ -486,15 +509,14 @@ namespace Cove.Server
                         if (messages.Count == 0)
                             break;
 
-                        //Log($"Received {messages.Count} messages on channel {i}");
+                        didWork = true;
                         for (int j = 0; j < messages.Count; j++)
                         {
-                            // print every attribute of the message
-                            //Log($"Message {j}:{messages[j].identity}");
                             OnNetworkPacket(messages[j].payload, new CSteamID(messages[j].identity));
                         }
                     }
                 }
+
                 catch (Exception e)
                 {
                     if (!showErrorMessages)
@@ -542,6 +564,7 @@ namespace Cove.Server
             {
                 string command = message.Split(' ')[0].Substring(1);
                 string[] args = message.Split(' ').Skip(1).ToArray();
+
                 if (DoseCommandExist(command))
                 {
                     InvokeCommand(sender, command, args);

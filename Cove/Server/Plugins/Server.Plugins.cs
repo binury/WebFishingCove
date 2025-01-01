@@ -64,6 +64,7 @@ namespace Cove.Server
                         if (plugin != null)
                         {
                             string pluginConfig = readConfigFromPlugin($"{assembly.GetName().Name}.plugin.cfg", assembly);
+                            if (pluginConfig == string.Empty) continue; // no config file found, its probably not a plugin
                             Dictionary<string, string> config = ConfigReader.ReadFile(pluginConfig);
 
                             PluginInstance thisInstance = new(plugin, config["name"], config["id"], config["author"]);
@@ -90,7 +91,7 @@ namespace Cove.Server
                 }
                 else
                 {
-                    throw new Exception("Plugin dosen't have a plugin.cfg file!");
+                    return "";
                 }
             }
         }

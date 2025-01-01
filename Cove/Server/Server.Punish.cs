@@ -34,14 +34,9 @@ namespace Cove.Server
             banPacket["type"] = "client_was_banned";
             sendPacketToPlayer(banPacket, id);
 
-            // get the wfPlayer object
-            var player = AllPlayers.Find(p => p.SteamId.m_SteamID == id.m_SteamID);
-            SteamNetworkingMessages.CloseSessionWithUser(ref player.identity);
-
             Dictionary<string, object> leftPacket = new();
-            leftPacket["type"] = "user_left_weblobby";
+            leftPacket["type"] = "peer_was_banned";
             leftPacket["user_id"] = (long)id.m_SteamID;
-            leftPacket["reason"] = (int)2;
             sendPacketToPlayers(leftPacket);
 
             if (saveToFile)
@@ -75,11 +70,14 @@ namespace Cove.Server
 
         public void kickPlayer(CSteamID id)
         {
-            Dictionary<string, object> kickPacket = new();
-            kickPacket["type"] = "kick";
+            Dictionary<string, object> leftPacket = new();
+            leftPacket["type"] = "peer_was_kicked";
+            leftPacket["user_id"] = (long)id.m_SteamID;
+            sendPacketToPlayers(leftPacket);
 
+            Dictionary<string, object> kickPacket = new();
+            kickPacket["type"] = "client_was_kicked";
             sendPacketToPlayer(kickPacket, id);
         }
-
     }
 }

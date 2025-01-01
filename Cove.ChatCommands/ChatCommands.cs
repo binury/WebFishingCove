@@ -105,11 +105,9 @@ public class ChatCommands : CovePlugin
             }
             else
             {
-                Dictionary<string, object> packet = new Dictionary<string, object>();
-                packet["type"] = "kick";
-                SendPacketToPlayer(packet, kickedplayer);
                 SendPlayerChatMessage(player, $"Kicked {kickedplayer.Username}");
-                SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
+                KickPlayer(kickedplayer);
+                //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
             }
         });
         SetCommandDescription("kick", "Kicks a player from the server");

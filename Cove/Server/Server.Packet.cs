@@ -104,6 +104,8 @@ namespace Cove.Server
                                 Log($"[{thisPlayer.SteamId.m_SteamID}] {thisPlayer.Username} joined the server");
                                 sendWebLobbyPacket(thisPlayer.SteamId);
                                 updatePlayercount();
+
+                                loadedPlugins.ForEach(p => p.plugin.onPlayerJoin(thisPlayer));
                             }
 
                         } else {
