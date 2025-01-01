@@ -200,7 +200,7 @@ namespace Cove.Server
                         break;
 
                     case "skibidi":
-                        Log("Dop dop, yes yes");
+                        Log("Dop dop dop, yes yes");
                         break;
 
                     default:
