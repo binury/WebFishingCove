@@ -187,6 +187,10 @@ namespace Cove.Server
                         showBotRejoins = getBoolFromString(config[key]);
                         break;
 
+                    case "skibidi":
+                        Log("Dop dop, yes yes");
+                        break;
+
                     default:
                         Log($"\"{key}\" is not a supported config option!");
                         continue;
