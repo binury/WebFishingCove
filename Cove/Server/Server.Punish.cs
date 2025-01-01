@@ -79,6 +79,5 @@ namespace Cove.Server
             kickPacket["type"] = "client_was_kicked";
             sendPacketToPlayer(kickPacket, id);
         }
-
     }
 }

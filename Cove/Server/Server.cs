@@ -346,6 +346,10 @@ namespace Cove.Server
 
                             SteamNetworkingMessages.CloseSessionWithUser(ref player.identity);
                             updatePlayercount();
+
+                            // tell all plugins that the player left
+                            loadedPlugins.ForEach(plugin => plugin.plugin.onPlayerLeave(player));
+
                         }
                     }
                 }
