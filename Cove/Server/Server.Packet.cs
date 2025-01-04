@@ -77,7 +77,7 @@ namespace Cove.Server
                         long actorID = (long)((Dictionary<string, object>)packetInfo["params"])["actor_id"];
 
                         // all actor types that should not be spawned by anyone but the server!
-                        string[] illegalTypes = ["fish_spawn_alien", "fish_spawn", "raincloud", "canvas", "ambient_bird", "void_portal"];
+                        string[] illegalTypes = ["fish_spawn_alien", "fish_spawn", "raincloud", "canvas", "ambient_bird", "void_portal", "metal_spawn"];
                         if (Array.LastIndexOf(illegalTypes, type) > -1)
                         {
                             WFPlayer offendingPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
