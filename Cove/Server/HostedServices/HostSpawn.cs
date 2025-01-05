@@ -60,7 +60,7 @@ namespace Cove.Server.HostedServices
                 // somthing has gone wrong, the server is no longer the host of the lobby
                 server.logger.Fatal("The server is no longer the host of the lobby, shutting down.");
                 server.logger.Fatal("Make sure you have a good connection to steam, this happends when the server disconnects from steam");
-                server.logger.Fatal("If your internet is unstable, this will happen offten!");
+                server.logger.Fatal("If your internet is unstable, this will happen often!");
 
                 // stop the server
                 server.Stop();
