@@ -41,6 +41,7 @@ namespace Cove.Server
         public string LobbyCode = new string(Enumerable.Range(0, 5).Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)]).ToArray());
         public bool codeOnly = true;
         public bool ageRestricted = false;
+        public bool maskMaxPlayers = false;
 
         public string joinMessage = "This is a Cove dedicated server!\nPlease report any issues to the github (xr0.xyz/cove)";
         public bool displayJoinMessage = true;
@@ -203,6 +204,10 @@ namespace Cove.Server
                         Log("Dop dop dop, yes yes");
                         break;
 
+                    case "maskMaxPlayers":
+                        maskMaxPlayers = getBoolFromString(config[key]);
+                        break;
+
                     default:
                         Log($"\"{key}\" is not a supported config option!");
                         continue;
@@ -286,8 +291,10 @@ namespace Cove.Server
                 SteamMatchmaking.SetLobbyData(SteamLobby, "type", "0");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "public", codeOnly ? "false" : "true");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "request", "false"); // make this a option later down the line
-                SteamMatchmaking.SetLobbyData(SteamLobby, "cap", MaxPlayers.ToString());
-                SteamMatchmaking.SetLobbyData(SteamLobby, "count", "1");
+                if (maskMaxPlayers && MaxPlayers > 12)
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", $"12");
+                else
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", $"{MaxPlayers}");
 
                 Log("Lobby Created!");
                 Log($"Lobby Code: {LobbyCode}");
@@ -355,7 +362,7 @@ namespace Cove.Server
                         if (player != null)
                         {
                             AllPlayers.Remove(player);
-                            Log($"[{player.SteamId.m_SteamID}] {player.Username} has left the game!");
+                            Log($"[{player.FisherID}] {player.Username} left. [{AllPlayers.Count}/{MaxPlayers}]");
 
                             Dictionary<string, object> leftPacket = new();
                             leftPacket["type"] = "user_left_weblobby";
@@ -471,10 +478,11 @@ namespace Cove.Server
                 }
             });
 
+            // add two to the max because the server counts as player and add one overflow player
             if (friendsOnly)
-                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, MaxPlayers);
+                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, MaxPlayers + 2);
             else
-                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, MaxPlayers);
+                SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypePublic, MaxPlayers + 2);
         }
 
         private bool getBoolFromString(string str)

@@ -212,7 +212,7 @@ namespace Cove.GodotFormat
             for (int i = 0; i < elementCount; i++)
             {
                 object keyValue = readNext();
-                string key = "NullValue";
+                var key = "NullValue";
 
                 if (keyValue == null || !(keyValue is String)) // if the value is not a string (bad read) break the loop.
                 {

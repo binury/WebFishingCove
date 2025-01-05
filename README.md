@@ -6,10 +6,17 @@ Cove is a dedicated server for WebFishing written in C#!
 
 Cove is a implementation of the WebFishing network protocall in a CLI meaning it dosent require Godot or anything other than Steamworks!
 
+# Fetures
+* Lightweight and Fast - Because of the lightweight nature of the server it can run with less than 1gb of ram with 20+ players on the server!
+* Moderation - Moderation is built into the Cove.Chatcommands plugin that cames bundled with the server!
+* Plugins - Plugins have full access to the internal server class allowing for extreme customisation!
+* .Net - Cove is written in C# on the dotnet framework, making plugin development easy, fast and accessible!
+* Support - Cove has a discord server for fast support for anything related to cove (including plugin development)
+
 # How it works
 Cove uses none of WebFishing's code, insted it used C# to emulate the same network calls that the offical game would make to host a lobby!
 
-Things like event spawning all had to be written from scratch to allow for the portability of C#! (also because i dont know GDScript)
+Things like event spawning all had to be written from scratch to allow for the portability of C#!
 
 Because of this emulation to run the server you must run it from a steam account that owns the game and that has steam open in the background
 
@@ -35,6 +42,7 @@ If you have any questions or issues with Cove, **create and issue on Github** or
 	- You can download the most recent version of the server here: [Nightly Releases](https://github.com/DrMeepso/WebFishingCove/tags)
 	- Or if you want the latest stable version it is here: [Latest Release](https://github.com/DrMeepso/WebFishingCove/releases/latest)
 	- A new build is made everytime code is changed so it may update quite alot!
+	- Also make sure you have the .net8 runtime installed, you can download it [here](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 2. Decompile WebFishing
 	- Once you have the source files drag the `main_zone.tscn` file into the `/worlds` folder of the server!
@@ -48,7 +56,7 @@ If you have any questions or issues with Cove, **create and issue on Github** or
 	- I.E. `76561198288728683 = true`
 
 4. Run!
-	- Run the server EXE and enjoy! 
+	- Run the server and enjoy! 
 	- Please be respectful and dont name the servers anything stupid!
 
 5. Look below
