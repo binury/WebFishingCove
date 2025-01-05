@@ -292,11 +292,9 @@ namespace Cove.Server
                 SteamMatchmaking.SetLobbyData(SteamLobby, "public", codeOnly ? "false" : "true");
                 SteamMatchmaking.SetLobbyData(SteamLobby, "request", "false"); // make this a option later down the line
                 if (maskMaxPlayers && MaxPlayers > 12)
-                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", "12");
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", $"12");
                 else
-                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", MaxPlayers.ToString());
-
-                SteamMatchmaking.SetLobbyData(SteamLobby, "count", "0");
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", $"{MaxPlayers}");
 
                 Log("Lobby Created!");
                 Log($"Lobby Code: {LobbyCode}");

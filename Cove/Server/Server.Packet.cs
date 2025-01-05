@@ -101,8 +101,7 @@ namespace Cove.Server
                                 allActors.Add(thisPlayer); // add the player to the actor list
 
                                 // print out a join message
-                                //Log($"[{thisPlayer.SteamId.m_SteamID}] {thisPlayer.Username} joined the server");
-                                Log($"[{thisPlayer.FisherID}] {thisPlayer.Username} left. [{AllPlayers.Count}/{MaxPlayers}]");
+                                Log($"[{thisPlayer.FisherID}] {thisPlayer.Username} joined. [{AllPlayers.Count}/{MaxPlayers}]");
                                 sendWebLobbyPacket(thisPlayer.SteamId);
                                 updatePlayercount();
 

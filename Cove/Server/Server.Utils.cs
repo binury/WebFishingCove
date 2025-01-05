@@ -332,7 +332,18 @@ namespace Cove.Server
 
             SteamMatchmaking.SetLobbyData(SteamLobby, "lobby_name", serverName);
             SteamMatchmaking.SetLobbyData(SteamLobby, "name", serverName);
+
             SteamMatchmaking.SetLobbyData(SteamLobby, "count", (AllPlayers.Count + 1).ToString());
+
+            if (maskMaxPlayers && MaxPlayers > 12)
+            {
+                if (AllPlayers.Count + 1 >= 12)
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", (AllPlayers.Count + 2).ToString());
+                if (AllPlayers.Count + 1 < 12)
+                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", "12+");
+            }
+            
+
         }
 
         public void disconnectAllPlayers()
