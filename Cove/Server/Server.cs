@@ -364,7 +364,7 @@ namespace Cove.Server
                         if (player != null)
                         {
                             AllPlayers.Remove(player);
-                            Log($"[{player.SteamId.m_SteamID}] {player.Username} has left the game!");
+                            Log($"[{player.FisherID}] {player.Username} left. [{AllPlayers.Count}/{MaxPlayers}]");
 
                             Dictionary<string, object> leftPacket = new();
                             leftPacket["type"] = "user_left_weblobby";
