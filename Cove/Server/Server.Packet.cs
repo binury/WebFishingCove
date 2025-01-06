@@ -82,11 +82,7 @@ namespace Cove.Server
                         {
                             WFPlayer offendingPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
 
-                            // kick the player because the spawned in a actor that only the server should be able to spawn!
-                            Dictionary<string, object> kickPacket = new Dictionary<string, object>();
-                            kickPacket["type"] = "kick";
-
-                            sendPacketToPlayer(kickPacket, sender);
+                            kickPlayer(sender);
 
                             messageGlobal($"{offendingPlayer.Username} was kicked for spawning illegal actors");
                         }
