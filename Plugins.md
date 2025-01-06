@@ -13,6 +13,7 @@ The repo for a template plugin can be found here: [CovePluginTemplate](https://g
 - Make sure you have dotnet 8.0 installed. (Cove uses .net 8!)
 - Create a new class library project in your IDE of choice.
 - Add a reference to the `Cove.dll` file, this can be found in the CoveServer directory.
+- If you didnt build Cove yourself, you can download this repo and reference it as a project in your solution.
 - Create a class that extends the `CovePlugin` class.
 - Implement the `onInit` method.
 - Add a `plugin.cfg` file to the project
@@ -44,7 +45,16 @@ public class ChatCommands : CovePlugin
     public override void onInit()
     {
         base.onInit();
-        Log("ChatCommands plugin loaded!");
+        Log("Plugin loaded!");
+    }
+
+    public override void onEnd()
+    {
+        base.onEnd();
+        // make sure you unload anything or stop any threads here!
+        // this is called when !reload is called or when the server ends
+        // if you wanna make sure your plugin reloads properly, make sure to clean up here!
+        Log("Plugin unloaded!");
     }
 
     public override void onChatMessage(WFPlayer sender, string message)
@@ -67,3 +77,5 @@ description=Simple chat logging plugin
 # Plugin API
 You can see all methods and properties available in the `CovePlugin` class here: [CovePlugin.cs](https://github.com/DrMeepso/WebFishingCove/blob/main/Cove/Server/Plugins/CovePlugin.cs)
 You can also use the `Server` property to access the CoveServer instance and all of its properties and methods!
+Most useful methods are in the [Server.Utils.cs](https://github.com/DrMeepso/WebFishingCove/blob/main/Cove/Server/Server.Utils.cs) file
+But anything in the server class is usable!
