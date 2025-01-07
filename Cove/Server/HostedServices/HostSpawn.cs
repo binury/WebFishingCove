@@ -18,6 +18,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cove.GodotFormat;
 using Cove.Server.Actor;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -143,6 +144,13 @@ namespace Cove.Server.HostedServices
 
                 }
 
+                // random neumber between 0 and 2 for 3 values
+                int random = ran.Next() % 3;
+                if (random == 0)
+                {
+                    spawnBirds();
+                }
+
             }
             catch (Exception e)
             {
@@ -151,6 +159,32 @@ namespace Cove.Server.HostedServices
                 // casued by a actorspawn or despawn, nothing huge.
                 _logger.LogError(e.ToString());
             }
+        }
+
+        void spawnBirds()
+        {
+            int birdCount = server.allActors.FindAll(a => a.Type == "ambient_bird").Count;
+            if (birdCount > 8)
+                return;
+
+            Random ran = new Random();
+            int count = ran.Next() % 3 + 1;
+
+            int randomRange(float min, float max)
+            {
+                return ran.Next() % (int)(max - min) + (int)min;
+            }
+
+            Vector3 point = server.trash_points[ran.Next() % server.trash_points.Count];
+
+            _logger.LogInformation("Spawning birds at " + point.ToString());
+            for (int i = 0; i < count; i++)
+            {
+                Vector3 pos = point + new Vector3(randomRange((float)-2.5,(float)2.5), 0, randomRange((float)-2.5, (float)2.5));
+                WFActor a = server.spawnGenericActor("ambient_bird", point);
+                a.despawnTime = 60;
+            }
+
         }
 
         // This method is called when the service is stopping.
