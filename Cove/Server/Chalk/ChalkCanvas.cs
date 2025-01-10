@@ -16,6 +16,12 @@ namespace Cove.Server.Chalk
 
         public void drawChalk(Vector2 position, int color)
         {
+            int[] allowedCanvas = { 0, 1, 2, 3 };
+            if (!Array.Exists(allowedCanvas, element => element == canvasID))
+            {
+                return;
+            }
+
             chalkImage[position] = color;
         }
 
@@ -35,16 +41,16 @@ namespace Cove.Server.Chalk
 
             return packet;
         }
-
         public void chalkUpdate(Dictionary<int, object> packet)
         {
             foreach (KeyValuePair<int, object> entry in packet)
             {
                 Dictionary<int, object> arr = (Dictionary<int, object>)entry.Value;
                 Vector2 vector2 = (Vector2)arr[0];
+                Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
                 Int64 color = (Int64)arr[1];
 
-                chalkImage[vector2] = (int)color;
+                chalkImage[pos] = (int)color;
             }
         }
 
