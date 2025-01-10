@@ -1,6 +1,5 @@
 ﻿namespace Cove.GodotFormat
 {
-
     public class Vector3
     {
         public float x;

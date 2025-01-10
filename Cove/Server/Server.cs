@@ -70,10 +70,10 @@ namespace Cove.Server
         Thread cbThread;
         Thread networkThread;
 
-        List<Vector3> fish_points;
-        List<Vector3> trash_points;
-        List<Vector3> shoreline_points;
-        List<Vector3> hidden_spot;
+        public List<Vector3> fish_points;
+        public List<Vector3> trash_points;
+        public List<Vector3> shoreline_points;
+        public List<Vector3> hidden_spot;
 
         Dictionary<string, IHostedService> services = new();
         public readonly object serverActorListLock = new();
