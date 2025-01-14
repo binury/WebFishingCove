@@ -343,6 +343,9 @@ namespace Cove.Server
                 if (stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeEntered))
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
+                    ulong steamID = param.m_ulSteamIDMakingChange;
+
+                    Log($"[{steamID}] {Username} is attempting to join the lobby.");
 
                     connectionsQueued.Add(userChanged);
                 }
