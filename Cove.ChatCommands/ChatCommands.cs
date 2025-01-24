@@ -56,7 +56,7 @@ public class ChatCommands : CovePlugin
             if (!IsPlayerAdmin(player)) return;
             if (args.Length == 0)
             {
-                SendPlayerChatMessage(player, "You didn't add an argument!")
+                SendPlayerChatMessage(player, "You didn't add an argument!");
                 return;
             }
             var actorType = args[0].ToLower();
