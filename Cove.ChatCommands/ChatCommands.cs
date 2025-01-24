@@ -54,6 +54,11 @@ public class ChatCommands : CovePlugin
         RegisterCommand("spawn", (player, args) =>
         {
             if (!IsPlayerAdmin(player)) return;
+            if (args.Length == 0)
+            {
+                SendPlayerChatMessage(player, "You didn't add an argument!")
+                return;
+            }
             var actorType = args[0].ToLower();
             bool spawned = false;
             switch (actorType)
