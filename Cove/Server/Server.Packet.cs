@@ -77,8 +77,13 @@ namespace Cove.Server
                         long actorID = (long)((Dictionary<string, object>)packetInfo["params"])["actor_id"];
 
                         // all actor types that should not be spawned by anyone but the server!
-                        string[] illegalTypes = ["fish_spawn_alien", "fish_spawn", "raincloud", "canvas", "ambient_bird", "void_portal", "metal_spawn"];
-                        if (Array.LastIndexOf(illegalTypes, type) > -1 && !isPlayerAdmin(sender))
+                        List<string> illegalTypes = ["fish_spawn_alien", "fish_spawn", "raincloud", "ambient_bird", "void_portal", "metal_spawn"];
+
+                        // if the server owner dosent want players to spawn canvas's then add it to the list
+                        if (!playersCanSpawnCanvas)
+                            illegalTypes.Add("canvas");
+
+                        if (Array.LastIndexOf(illegalTypes.ToArray(), type) > -1 && !isPlayerAdmin(sender))
                         {
                             kickPlayer(sender);
 
