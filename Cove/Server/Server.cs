@@ -55,6 +55,8 @@ namespace Cove.Server
         public bool showBotRejoins = true;
         public bool friendsOnly = false;
 
+        public bool playersCanSpawnCanvas = false;
+
         List<string> Admins = new();
         public CSteamID SteamLobby;
 
@@ -206,6 +208,10 @@ namespace Cove.Server
 
                     case "maskMaxPlayers":
                         maskMaxPlayers = getBoolFromString(config[key]);
+                        break;
+
+                    case "playersCanSpawnCanvas":
+                        playersCanSpawnCanvas = getBoolFromString(config[key]);
                         break;
 
                     default:

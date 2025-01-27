@@ -177,7 +177,6 @@ namespace Cove.Server.HostedServices
 
             Vector3 point = server.trash_points[ran.Next() % server.trash_points.Count];
 
-            _logger.LogInformation("Spawning birds at " + point.ToString());
             for (int i = 0; i < count; i++)
             {
                 Vector3 pos = point + new Vector3(randomRange((float)-2.5,(float)2.5), 0, randomRange((float)-2.5, (float)2.5));

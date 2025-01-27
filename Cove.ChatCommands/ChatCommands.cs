@@ -95,6 +95,7 @@ public class ChatCommands : CovePlugin
         });
         SetCommandDescription("spawn", "Spawns an actor");
 
+        /*
         RegisterCommand("kick", (player, args) =>
         {
             if (!IsPlayerAdmin(player)) return;
@@ -140,6 +141,7 @@ public class ChatCommands : CovePlugin
             }
         });
         SetCommandDescription("ban", "Bans a player from the server");
+        */
 
         RegisterCommand("setjoinable", (player, args) =>
         {

@@ -62,6 +62,58 @@ namespace Cove.Server
 
             });
             SetCommandDescription("exit", "Shuts down the server (host only)");
+
+            RegisterCommand("kick", (player, args) =>
+            {
+                if (!isPlayerAdmin(player.SteamId)) return;
+                string playerIdent = string.Join(" ", args);
+                // try find a user with the username first
+                WFPlayer kickedplayer = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                // if there is no player with the username try find someone with that fisher ID
+                if (kickedplayer == null)
+                    kickedplayer = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                if (kickedplayer == null)
+                {
+                    messagePlayer("That's not a player!" , player.SteamId);
+                }
+                else
+                {
+                    messagePlayer($"Kicked {kickedplayer.Username}", player.SteamId);
+                    kickPlayer(kickedplayer.SteamId);
+                    //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
+                }
+            });
+            SetCommandDescription("kick", "Kicks a player from the server");
+
+            RegisterCommand("ban", (player, args) =>
+            {
+                if (!isPlayerAdmin(player.SteamId)) return;
+                // hacky fix,
+                // Extract player name from the command message
+                string playerIdent = string.Join(" ", args);
+                // try find a user with the username first
+                WFPlayer playerToBan = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                // if there is no player with the username try find someone with that fisher ID
+                if (playerToBan == null)
+                    playerToBan = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                if (playerToBan == null)
+                {
+                    messagePlayer("Player not found!", player.SteamId);
+                }
+                else
+                {
+
+                    if (isPlayerBanned(playerToBan.SteamId))
+                        banPlayer(playerToBan.SteamId);
+                    else
+                        banPlayer(playerToBan.SteamId, true); // save to file if they are not already in there!
+
+                    messagePlayer($"Banned {playerToBan.Username}", player.SteamId);
+                    messageGlobal($"{playerToBan.Username} has been banned from the server.");
+                }
+            });
+            SetCommandDescription("ban", "Bans a player from the server");
+
         }
 
         public void RegisterCommand(string command, Action<WFPlayer, string[]> cb)
