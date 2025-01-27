@@ -102,7 +102,12 @@ namespace Cove.Server
                 }
                 else
                 {
-                    banPlayer(playerToBan.SteamId);
+
+                    if (isPlayerBanned(playerToBan.SteamId))
+                        banPlayer(playerToBan.SteamId);
+                    else
+                        banPlayer(playerToBan.SteamId, true); // save to file if they are not already in there!
+
                     messagePlayer($"Banned {playerToBan.Username}", player.SteamId);
                     messageGlobal($"{playerToBan.Username} has been banned from the server.");
                 }
