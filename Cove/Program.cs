@@ -64,7 +64,12 @@ void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
 
 while (true)
 {
-    string input = Console.ReadLine();
+    var input = Console.ReadLine();
+
+    // prevent null inputs
+    if (input == null)
+        continue;
+
     string command = input.Split(' ')[0];
 
     if (webfishingServer.DoseCommandExist(command))
