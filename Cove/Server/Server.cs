@@ -444,7 +444,7 @@ namespace Cove.Server
                         if (AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
                         {
                             sendWebLobbyPacket(userId);
-                            return;
+                            //return;
                         }
 
                         // check if the user is banned 
