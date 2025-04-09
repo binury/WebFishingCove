@@ -444,7 +444,9 @@ namespace Cove.Server
                         if (AllPlayers.Contains(AllPlayers.Find(p => p.SteamId == userId)))
                         {
                             sendWebLobbyPacket(userId);
-                            //return;
+                            Log("User: " + userId + " is already in the lobby!");
+                            Log("If player is stuck on loading screen please tell me (Meepso)");
+                            return;
                         }
 
                         // check if the user is banned 
