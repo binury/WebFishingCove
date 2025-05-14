@@ -196,7 +196,7 @@ namespace Cove.Server
 
                         if (Message.StartsWith("(%u")) // Format for a /me message
                         {
-                            // Because its easyer im just gonna replace the %u with the players name
+                            // Because it's easier I'm just gonna replace the %u with the player's name
                             // and use that as the message content
                             var thisPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
                             if (thisPlayer == null) return;
