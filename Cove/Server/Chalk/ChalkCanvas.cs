@@ -1,4 +1,5 @@
 ﻿using Cove.GodotFormat;
+using Serilog;
 using System;
 
 namespace Cove.Server.Chalk
@@ -49,6 +50,22 @@ namespace Cove.Server.Chalk
                 Vector2 vector2 = (Vector2)arr[0];
                 Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
                 Int64 color = (Int64)arr[1];
+
+
+                // YES, I know this is inefficient
+                // I dont want to break compatibility with the old code
+                // It should be fine, its per canvas
+                // but if it becomes a problem, I hope someone files a issue and
+                // I'll put a performance fix in
+                for (int i = 0; i < chalkImage.Count; i++)
+                {
+                    Vector2 key = chalkImage.ElementAt(i).Key;
+                    if (key.x == pos.x && key.y == pos.y)
+                    {
+                        chalkImage.Remove(key);
+                        break;
+                    }
+                }
 
                 chalkImage[pos] = (int)color;
             }

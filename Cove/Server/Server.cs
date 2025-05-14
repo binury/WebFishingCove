@@ -28,6 +28,7 @@ using System.Text.Unicode;
 using System.Text;
 using System.Reflection;
 using System.Threading.Channels;
+using Cove.Server.Packets;
 
 namespace Cove.Server
 {
@@ -522,11 +523,12 @@ namespace Cove.Server
                 bool didWork = false;
                 try
                 {
-                    for (int i = 0; i < 6; i++)
+                    for (int i = 0; i < 7; i++)
                     {
                         List<NetworkingMessage> messages = ReceiveMessagesOnChannel(i, 50);
                         if (messages.Count == 0)
-                            break;
+                            // Skip processing this channel if no messages were received.
+                            continue;
 
                         didWork = true;
                         for (int j = 0; j < messages.Count; j++)
