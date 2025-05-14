@@ -142,11 +142,6 @@ namespace Cove.Server
 
                 case "actor_action":
                     {
-                        if ((string)packetInfo["action"] == "_sync_create_bubble")
-                        {
-                            string Message = (string)((Dictionary<int, object>)packetInfo["params"])[0];
-                            OnPlayerChat(Message, sender);
-                        }
                         if ((string)packetInfo["action"] == "_wipe_actor")
                         {
                             long actorToWipe = (long)((Dictionary<int, object>)packetInfo["params"])[0];
@@ -189,6 +184,28 @@ namespace Cove.Server
 
                     }
                     break;
+
+                case "message":
+                    {
+                        string Message = (string)packetInfo["message"];
+                        if (Message.StartsWith("%u:")) // Format for a normal chat message
+                        {
+                            string playerMessage = Message.Replace("%u: ", "");
+                            OnPlayerChat(playerMessage, sender);
+                        }
+
+                        if (Message.StartsWith("(%u")) // Format for a /me message
+                        {
+                            // Because its easyer im just gonna replace the %u with the players name
+                            // and use that as the message content
+                            var thisPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
+                            if (thisPlayer == null) return;
+                            string playerMessage = Message.Replace("%u", thisPlayer.Username);
+                            OnPlayerChat(playerMessage, sender);
+                        }
+                    }
+                    break;
+
             }
         }
 
