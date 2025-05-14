@@ -527,7 +527,8 @@ namespace Cove.Server
                     {
                         List<NetworkingMessage> messages = ReceiveMessagesOnChannel(i, 50);
                         if (messages.Count == 0)
-                            continue; // asdfg
+                            // Skip processing this channel if no messages were received.
+                            continue;
 
                         didWork = true;
                         for (int j = 0; j < messages.Count; j++)
