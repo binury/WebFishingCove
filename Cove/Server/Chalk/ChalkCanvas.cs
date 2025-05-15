@@ -71,6 +71,9 @@ namespace Cove.Server.Chalk
                     expendedPixels.Add(pos);
                     chalkImage[pos] = (int)((Int64)arr[1]);
                 }
+
+                Console.WriteLine("A packet that was passed to the Fallback function was processed successfully");
+
             }
             else
             {
@@ -83,8 +86,6 @@ namespace Cove.Server.Chalk
                     chalkImage[pos] = (int)((Int64)arr[1]);
                 }
             }
-
-            Console.WriteLine("Chalk Update: " + packet.Count);
         }
 
         public void clearCanvas()
