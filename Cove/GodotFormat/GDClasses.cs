@@ -139,6 +139,20 @@
         {
             return $"({x}, {y})";
         }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj is Vector2 other)
+            {
+                return x == other.x && y == other.y;
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(x, y);
+        }
     }
 
     public class Quat
