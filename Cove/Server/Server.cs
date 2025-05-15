@@ -533,6 +533,12 @@ namespace Cove.Server
                         didWork = true;
                         for (int j = 0; j < messages.Count; j++)
                         {
+                            if (i == 3 && messages[j].size > 50000)
+                            {
+                                string UserName = SteamFriends.GetFriendPersonaName(new CSteamID(messages[j].identity));
+                                Log($"[{UserName}] Sent a chalk packet of size {messages[j].size} bytes");
+                                Log($"Due to the size of this packet, there is a change it will not be processed correctly.");
+                            }
                             OnNetworkPacket(messages[j].payload, new CSteamID(messages[j].identity));
                         }
                     }

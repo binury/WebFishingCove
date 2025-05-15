@@ -42,33 +42,49 @@ namespace Cove.Server.Chalk
 
             return packet;
         }
+
+        // The ammount of chalk pixels needed to trigger the fallback process
+        const int TRIGGER_FALLBACK_CHALK_SIZE = 100000; // around .3mb worth of chalk data
+
         public void chalkUpdate(Dictionary<int, object> packet)
         {
-            foreach (KeyValuePair<int, object> entry in packet)
+            // This callback is made when there is too much chalk data
+            // it runs under the assumption that the newest chalk data is at the end of the packet
+            // Webfishing will set pixels multiple times in the chalk data
+            // assuming that the chalk data is in order, we can just take the last value
+            // Because the newest data is at the end of the packet we update till we reach the point
+            // of a pixel being set multiple times
+            if (packet.Count >= TRIGGER_FALLBACK_CHALK_SIZE)
             {
-                Dictionary<int, object> arr = (Dictionary<int, object>)entry.Value;
-                Vector2 vector2 = (Vector2)arr[0];
-                Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
-                Int64 color = (Int64)arr[1];
-
-
-                // YES, I know this is inefficient
-                // I dont want to break compatibility with the old code
-                // It should be fine, its per canvas
-                // but if it becomes a problem, I hope someone files a issue and
-                // I'll put a performance fix in
-                for (int i = 0; i < chalkImage.Count; i++)
+                List<Vector2> expendedPixels = new List<Vector2>(chalkImage.Keys);
+                for (int i = packet.Count; i >= 0; i--)
                 {
-                    Vector2 key = chalkImage.ElementAt(i).Key;
-                    if (key.x == pos.x && key.y == pos.y)
+                    Dictionary<int, object> arr = (Dictionary<int, object>)packet[i-1];
+                    Vector2 vector2 = (Vector2)arr[0];
+                    Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
+
+                    if (expendedPixels.Contains(pos))
                     {
-                        chalkImage.Remove(key);
                         break;
                     }
-                }
 
-                chalkImage[pos] = (int)color;
+                    expendedPixels.Add(pos);
+                    chalkImage[pos] = (int)((Int64)arr[1]);
+                }
             }
+            else
+            {
+                for (int i = 0; i < packet.Count; i++)
+                {
+                    Dictionary<int, object> arr = (Dictionary<int, object>)packet[i];
+                    Vector2 vector2 = (Vector2)arr[0];
+                    Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
+
+                    chalkImage[pos] = (int)((Int64)arr[1]);
+                }
+            }
+
+            Console.WriteLine("Chalk Update: " + packet.Count);
         }
 
         public void clearCanvas()
