@@ -175,7 +175,7 @@ namespace Cove.Server
 
                         if (canvas == null)
                         {
-                            //Log($"Creating new canvas: {canvasID}");
+                            
                             canvas = new Chalk.ChalkCanvas(canvasID);
                             chalkCanvas.Add(canvas);
                         }
