@@ -72,6 +72,7 @@ public class ChatCommands : CovePlugin
                     spawned = true;
                     break;
                 case "meteor":
+                case "meatball":
                     spawned = true;
                     Server.spawnFish("fish_spawn_alien");
                     break;
