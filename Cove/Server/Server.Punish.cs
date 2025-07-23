@@ -64,8 +64,9 @@ namespace Cove.Server
         private void writeToBansFile(CSteamID id)
         {
             string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
-            WFPlayer player = AllPlayers.Find(p => p.SteamId == id);
-            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{player.Username}"]);
+            PreviousPlayer player = PreviousPlayers.Find(p => p.SteamId == id);
+            string username = player != null ? player.Username : "Unknown";
+            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{username}"]);
         }
 
         public void kickPlayer(CSteamID id)

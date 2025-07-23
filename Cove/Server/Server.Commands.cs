@@ -91,11 +91,33 @@ namespace Cove.Server
                 // hacky fix,
                 // Extract player name from the command message
                 string playerIdent = string.Join(" ", args);
-                // try find a user with the username first
-                WFPlayer playerToBan = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-                // if there is no player with the username try find someone with that fisher ID
+                // try to find a user with the username first
+                var playerToBan = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                // if there is no player with the username try to find someone with that fisher ID
                 if (playerToBan == null)
                     playerToBan = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                
+                // this could be programmed better, but it works
+                if (playerToBan == null)
+                {
+                    var previousPlayer = PreviousPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                    if (previousPlayer != null)
+                    {
+                        messagePlayer($"There is a previous player with that name, if you meant to ban them add a # before the ID: #{playerIdent}", player.SteamId);
+                        return;
+                    }
+                    
+                    previousPlayer = PreviousPlayers.ToList().Find(p => $"#{p.FisherID}".Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                    if (previousPlayer != null)
+                    {
+                        playerToBan = new WFPlayer(previousPlayer.SteamId, previousPlayer.Username, new SteamNetworkingIdentity())
+                        {
+                            FisherID = previousPlayer.FisherID,
+                            Username = previousPlayer.Username,
+                        };
+                    }
+                }
+                
                 if (playerToBan == null)
                 {
                     messagePlayer("Player not found!", player.SteamId);
@@ -114,6 +136,31 @@ namespace Cove.Server
             });
             SetCommandDescription("ban", "Bans a player from the server");
 
+            RegisterCommand("prev", (player, args) =>
+            {
+                if (!isPlayerAdmin(player.SteamId)) return;
+                var sb = new StringBuilder();
+                sb.AppendLine("Previous Players:");
+                foreach (var prevPlayer in PreviousPlayers)
+                {
+                    if (prevPlayer.State == PlayerState.InGame) continue;
+
+                    // we dont want to show players that left more than 10 minutes ago
+                    if ((DateTime.UtcNow - DateTimeOffset.FromUnixTimeSeconds(prevPlayer.leftTimestamp).UtcDateTime)
+                            .TotalMinutes > 10)
+                    {
+                        continue;
+                    }
+                    
+                    // get the time since the player left in a human readable format
+                    string timeLeft =
+                        $"{Math.Round((DateTime.UtcNow - DateTimeOffset.FromUnixTimeSeconds(prevPlayer.leftTimestamp).UtcDateTime).TotalMinutes)} minutes ago";
+                    sb.Append($"{prevPlayer.Username} ({prevPlayer.FisherID}) - Left: {timeLeft}\n");
+                }
+                messagePlayer(sb.ToString(), player.SteamId);
+            });
+            SetCommandDescription("prev", "Shows a list of previous players that were connected to the server");
+            
         }
 
         public void RegisterCommand(string command, Action<WFPlayer, string[]> cb)

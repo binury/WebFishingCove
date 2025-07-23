@@ -82,6 +82,8 @@ namespace Cove.Server
 
         public List<string> WantedTags = new();
 
+        public List<PreviousPlayer> PreviousPlayers = new();
+        
         public void Init()
         {
             cbThread = new(runSteamworksUpdate);
@@ -346,6 +348,7 @@ namespace Cove.Server
                 CSteamID userMakingChange = new CSteamID(param.m_ulSteamIDMakingChange);
 
                 EChatMemberStateChange stateChange = (EChatMemberStateChange)param.m_rgfChatMemberStateChange;
+                // Player joined the lobby
                 if (stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeEntered))
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
@@ -356,6 +359,7 @@ namespace Cove.Server
                     connectionsQueued.Add(userChanged);
                 }
 
+                // Player left the lobby
                 if (stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeLeft) || stateChange.HasFlag(EChatMemberStateChange.k_EChatMemberStateChangeDisconnected))
                 {
                     string Username = SteamFriends.GetFriendPersonaName(userChanged);
@@ -367,7 +371,7 @@ namespace Cove.Server
                     // if player is in AllPlayers, remove them
                     if (!connectionsQueued.Contains(userChanged))
                     {
-                        WFPlayer player = AllPlayers.Find(p => p.SteamId == userChanged);
+                        var player = AllPlayers.Find(p => p.SteamId == userChanged);
                         if (player != null)
                         {
                             AllPlayers.Remove(player);
@@ -385,6 +389,21 @@ namespace Cove.Server
                             // tell all plugins that the player left
                             loadedPlugins.ForEach(plugin => plugin.plugin.onPlayerLeave(player));
 
+                            // find the previous player and update their state
+                            var previousPlayer = PreviousPlayers.Find(p => p.SteamId == player.SteamId);
+                            if (previousPlayer != null)
+                            {
+                                previousPlayer.leftTimestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                                previousPlayer.State = PlayerState.Left;
+                            }
+                            else
+                            {
+                                // if the player is not in the previous players list, add them
+                                var p = PreviousPlayer.FromWFPlayer(player);
+                                PreviousPlayers.Add(p);
+                                p.leftTimestamp = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                                p.State = PlayerState.Left;
+                            }
                         }
                     }
                 }
@@ -467,6 +486,21 @@ namespace Cove.Server
                         // make the player a wfplayer
                         WFPlayer player = new WFPlayer(userId, SteamFriends.GetFriendPersonaName(userId), new SteamNetworkingIdentity());
                         AllPlayers.Add(player);
+                        
+                        // if there is already a player with the same FisherID, remove them from the previous players list to prevent duplicates
+                        var sharedIDPrev = PreviousPlayers.Find(p => p.FisherID == player.FisherID);
+                        if (sharedIDPrev != null)
+                        {
+                            PreviousPlayers.Remove(sharedIDPrev); // remove the previous player with the same FisherID
+                        }
+                        
+                        var prev = PreviousPlayers.Find(p => p.SteamId == userId);
+                        if (prev != null)
+                        {
+                            PreviousPlayers.Remove(prev); // remove the previous player if they are already in the list
+                        }
+                        
+                        PreviousPlayers.Add( PreviousPlayer.FromWFPlayer(player) ); // add the player to the previous players list
 
                         Dictionary<string, object> joinedPacket = new();
                         joinedPacket["type"] = "user_joined_weblobby";
