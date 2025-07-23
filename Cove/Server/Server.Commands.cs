@@ -118,6 +118,20 @@ namespace Cove.Server
                     }
                 }
                 
+                // use regex to check if its a steam ID
+                if (playerToBan == null && System.Text.RegularExpressions.Regex.IsMatch(playerIdent, @"^7656119\d{10}$"))
+                {
+                    // if it is a steam ID, try to find the player by steam ID
+                    CSteamID steamId = new CSteamID(Convert.ToUInt64(playerIdent));
+                    if (isPlayerBanned(steamId))
+                        banPlayer(steamId);
+                    else
+                        banPlayer(steamId, true);
+                    
+                    messagePlayer($"Banned player with Steam ID {playerIdent}", player.SteamId);
+                    return;
+                }
+                
                 if (playerToBan == null)
                 {
                     messagePlayer("Player not found!", player.SteamId);
