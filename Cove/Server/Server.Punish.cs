@@ -65,7 +65,8 @@ namespace Cove.Server
         {
             string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
             PreviousPlayer player = PreviousPlayers.Find(p => p.SteamId == id);
-            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{player.Username}"]);
+            string username = player != null ? player.Username : "Unknown";
+            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{username}"]);
         }
 
         public void kickPlayer(CSteamID id)
