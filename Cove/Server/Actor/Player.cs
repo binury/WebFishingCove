@@ -46,4 +46,38 @@ namespace Cove.Server.Actor
             this.identity = identity;
         }
     };
+
+    public enum PlayerState
+    {
+        InGame,
+        Left,
+    }
+    
+    // Represents a player that was previously connected to the server
+    public class PreviousPlayer
+    {
+        public CSteamID SteamId { get; set; }
+        public string FisherID { get; set; }
+        public string Username { get; set; }
+        
+        public uint leftTimestamp { get; set; } = 0; // Timestamp when the player left, 0 if they are still connected
+        public PlayerState State { get; set; } = PlayerState.InGame; // Current state of the player
+        
+        public PreviousPlayer(CSteamID id, string fisherName, string FishID)
+        {
+            SteamId = id;
+            FisherID = FishID;
+            Username = fisherName;
+        }
+        
+        public static PreviousPlayer FromWFPlayer(WFPlayer player)
+        {
+            return new PreviousPlayer(
+                player.SteamId,
+                player.Username,
+                player.FisherID
+            );
+        }
+    }
+    
 }
