@@ -75,15 +75,9 @@ namespace Cove.Server.Plugins
             ParentServer.kickPlayer(player.SteamId);
         }
 
-        public void BanPlayer(WFPlayer player)
+        public void BanPlayer(WFPlayer player, string reason = "")
         {
-            if (ParentServer.isPlayerBanned(player.SteamId))
-            {
-                ParentServer.banPlayer(player.SteamId);
-            } else
-            {
-                ParentServer.banPlayer(player.SteamId, true); // save to file if they are not already in there!
-            }
+            ParentServer.banPlayer(player.SteamId, !ParentServer.isPlayerBanned(player.SteamId), reason);
         }
 
         public void Log(string message)

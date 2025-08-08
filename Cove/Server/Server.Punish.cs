@@ -27,9 +27,9 @@ namespace Cove.Server
 {
     public partial class CoveServer
     {
-
-        public void banPlayer(CSteamID id, bool saveToFile = false)
+        public void banPlayer(CSteamID id, bool saveToFile = false, string banReason = "")
         {
+
             Dictionary<string, object> banPacket = new();
             banPacket["type"] = "client_was_banned";
             sendPacketToPlayer(banPacket, id);
@@ -40,7 +40,7 @@ namespace Cove.Server
             sendPacketToPlayers(leftPacket);
 
             if (saveToFile)
-                writeToBansFile(id);
+                writeToBansFile(id, banReason);
 
             sendBlacklistPacketToAll(id.m_SteamID.ToString());
         }
@@ -61,12 +61,14 @@ namespace Cove.Server
             return false;
         }
 
-        private void writeToBansFile(CSteamID id)
+        private void writeToBansFile(CSteamID id, string reason)
         {
-            string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
-            PreviousPlayer player = PreviousPlayers.Find(p => p.SteamId == id);
-            string username = player != null ? player.Username : "Unknown";
-            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{username}"]);
+            string entry = $"{id.m_SteamID} # ";
+            string username = PreviousPlayers.Find(p => p.SteamId == id)?.Username ?? "Unknown";
+            entry += username;
+            if (!string.IsNullOrEmpty(reason))
+                entry += $" - {reason}";
+            File.AppendAllLines($"{AppDomain.CurrentDomain.BaseDirectory}bans.txt", [entry]);
         }
 
         public void kickPlayer(CSteamID id)
