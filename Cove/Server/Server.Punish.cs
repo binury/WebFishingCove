@@ -21,6 +21,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cove.Server.Actor;
+using Cove.Server.Plugins;
 using Steamworks;
 
 namespace Cove.Server
@@ -29,6 +30,7 @@ namespace Cove.Server
     {
         public void banPlayer(CSteamID id, bool saveToFile = false, string banReason = "")
         {
+            var player = new WFPlayer(id, Steamworks.SteamFriends.GetFriendPersonaName(id), new SteamNetworkingIdentity());
 
             Dictionary<string, object> banPacket = new();
             banPacket["type"] = "client_was_banned";
@@ -38,6 +40,12 @@ namespace Cove.Server
             leftPacket["type"] = "peer_was_banned";
             leftPacket["user_id"] = (long)id.m_SteamID;
             sendPacketToPlayers(leftPacket);
+
+
+            foreach (PluginInstance plugin in loadedPlugins)
+            {
+                plugin.plugin.onPlayerBanned(player, banReason);
+            }
 
             if (saveToFile)
                 writeToBansFile(id, banReason);

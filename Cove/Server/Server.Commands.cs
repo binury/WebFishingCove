@@ -196,9 +196,6 @@ namespace Cove.Server
                             !isPlayerBanned(playerToBan.SteamId),
                             banReason
                         );
-
-                        messagePlayer($"Banned {playerToBan.Username}", player.SteamId);
-                        messageGlobal($"{playerToBan.Username} has been banned from the server");
                     }
                 }
             );

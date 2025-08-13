@@ -24,8 +24,14 @@ namespace Cove.Server.Plugins
         public virtual void onPlayerJoin(WFPlayer player) { }
         // triggered when a player leaves the server
         public virtual void onPlayerLeave(WFPlayer player) { }
-        // triggered when a packet arrives
-        public virtual void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet) { }
+        /// <summary>
+        /// Triggered when a player is banned from the server
+        /// </summary>
+        /// <param name="player">If unknown, this will be an empty string</param>
+        /// <param name="reason">If not given, this will be an empty string</param>
+        public virtual void onPlayerBanned(WFPlayer player, string reason) { }
+		// triggered when a packet arrives
+		public virtual void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet) { }
 
         public WFPlayer[] GetAllPlayers()
         {
