@@ -199,7 +199,7 @@ namespace Cove.Server
                     }
                 }
             );
-            SetCommandDescription("ban", "Bans a player from the server");
+            SetCommandDescription("ban", "Usage: !ban (username|steamID|FisherID) \"Reason for ban\"");
 
             RegisterCommand("prev", (player, args) =>
             {
