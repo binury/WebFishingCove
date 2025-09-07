@@ -24,8 +24,14 @@ namespace Cove.Server.Plugins
         public virtual void onPlayerJoin(WFPlayer player) { }
         // triggered when a player leaves the server
         public virtual void onPlayerLeave(WFPlayer player) { }
-        // triggered when a packet arrives
-        public virtual void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet) { }
+        /// <summary>
+        /// Triggered when a player is banned from the server
+        /// </summary>
+        /// <param name="player">If unknown, this will be an empty string</param>
+        /// <param name="reason">If not given, this will be an empty string</param>
+        public virtual void onPlayerBanned(WFPlayer player, string reason) { }
+		// triggered when a packet arrives
+		public virtual void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet) { }
 
         public WFPlayer[] GetAllPlayers()
         {
@@ -75,15 +81,9 @@ namespace Cove.Server.Plugins
             ParentServer.kickPlayer(player.SteamId);
         }
 
-        public void BanPlayer(WFPlayer player)
+        public void BanPlayer(WFPlayer player, string reason = "")
         {
-            if (ParentServer.isPlayerBanned(player.SteamId))
-            {
-                ParentServer.banPlayer(player.SteamId);
-            } else
-            {
-                ParentServer.banPlayer(player.SteamId, true); // save to file if they are not already in there!
-            }
+            ParentServer.banPlayer(player.SteamId, !ParentServer.isPlayerBanned(player.SteamId), reason);
         }
 
         public void Log(string message)

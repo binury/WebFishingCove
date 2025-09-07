@@ -28,7 +28,6 @@ using System.Text.Unicode;
 using System.Text;
 using System.Reflection;
 using System.Threading.Channels;
-using Cove.Server.Packets;
 
 namespace Cove.Server
 {

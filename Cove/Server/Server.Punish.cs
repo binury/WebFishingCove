@@ -21,15 +21,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cove.Server.Actor;
+using Cove.Server.Plugins;
 using Steamworks;
 
 namespace Cove.Server
 {
     public partial class CoveServer
     {
-
-        public void banPlayer(CSteamID id, bool saveToFile = false)
+        public void banPlayer(CSteamID id, bool saveToFile = false, string banReason = "")
         {
+            var player = new WFPlayer(id, Steamworks.SteamFriends.GetFriendPersonaName(id), new SteamNetworkingIdentity());
+
             Dictionary<string, object> banPacket = new();
             banPacket["type"] = "client_was_banned";
             sendPacketToPlayer(banPacket, id);
@@ -39,8 +41,14 @@ namespace Cove.Server
             leftPacket["user_id"] = (long)id.m_SteamID;
             sendPacketToPlayers(leftPacket);
 
+
+            foreach (PluginInstance plugin in loadedPlugins)
+            {
+                plugin.plugin.onPlayerBanned(player, banReason);
+            }
+
             if (saveToFile)
-                writeToBansFile(id);
+                writeToBansFile(id, banReason);
 
             sendBlacklistPacketToAll(id.m_SteamID.ToString());
         }
@@ -68,12 +76,14 @@ namespace Cove.Server
             return false;
         }
 
-        private void writeToBansFile(CSteamID id)
+        private void writeToBansFile(CSteamID id, string reason)
         {
-            string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
-            PreviousPlayer player = PreviousPlayers.Find(p => p.SteamId == id);
-            string username = player != null ? player.Username : "Unknown";
-            File.AppendAllLines(fileDir, [$"{id.m_SteamID} #{username}"]);
+            string entry = $"{id.m_SteamID} # ";
+            string username = PreviousPlayers.Find(p => p.SteamId == id)?.Username ?? "Unknown";
+            entry += username;
+            if (!string.IsNullOrEmpty(reason))
+                entry += $" - {reason}";
+            File.AppendAllLines($"{AppDomain.CurrentDomain.BaseDirectory}bans.txt", [entry]);
         }
 
         public void kickPlayer(CSteamID id)

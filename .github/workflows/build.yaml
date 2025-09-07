@@ -35,7 +35,7 @@ jobs:
 
       # Step 6: Upload the Windows build as an artifact to be used in release
       - name: Upload Windows Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: win64
           path: ./publish/win64.zip
@@ -77,7 +77,7 @@ jobs:
 
       # Step 8: Upload the Linux build as an artifact to be used in release
       - name: Upload Linux Build Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: linux64
           path: ./publish/linux64.zip
@@ -90,12 +90,12 @@ jobs:
     steps:
       # Step 1: Download artifacts from previous jobs
       - name: Download Windows Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: win64
 
       - name: Download Linux Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: linux64
 
