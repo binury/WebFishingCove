@@ -84,7 +84,7 @@ namespace Cove.Server
                 {
                     // if it is a steam ID, try to find the player by steam ID
                     CSteamID steamId = new CSteamID(Convert.ToUInt64(playerIdent));
-                    messagePlayer($"Kicked {kickedplayer.Username}", player.SteamId);
+                    messagePlayer($"Kicked {playerIdent}", player.SteamId);
                     kickPlayer(steamId);
                     return;
                 }
