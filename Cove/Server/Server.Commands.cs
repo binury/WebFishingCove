@@ -34,7 +34,7 @@ namespace Cove.Server
     {
         List<RegisteredCommand> Commands = [];
 
-        private WFPlayer getPlayer(string playerIdent)
+        public WFPlayer GetPlayer(string playerIdent)
         {
             var selectedPlayer = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
             // if there is no player with the username try to find someone with that fisher ID
@@ -78,7 +78,7 @@ namespace Cove.Server
                 if (!isPlayerAdmin(player.SteamId)) return;
                 string playerIdent = string.Join(" ", args);
                 // try find a user with the username first
-                var kickedplayer = getPlayer(playerIdent);
+                var kickedplayer = GetPlayer(playerIdent);
                 
                 if (kickedplayer == null && System.Text.RegularExpressions.Regex.IsMatch(playerIdent, @"^7656119\d{10}$"))
                 {
@@ -108,7 +108,7 @@ namespace Cove.Server
                 // Extract player name from the command message
                 string playerIdent = string.Join(" ", args);
                 // try to find a user with the username first
-                var playerToBan = getPlayer(playerIdent);
+                var playerToBan = GetPlayer(playerIdent);
                 
                 var previousPlayer = PreviousPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
                 if (previousPlayer != null)

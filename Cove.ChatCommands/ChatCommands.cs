@@ -110,54 +110,6 @@ public class ChatCommands : CovePlugin
         });
         SetCommandDescription("spawn", "Spawns an actor");
 
-        /*
-        RegisterCommand("kick", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            string playerIdent = string.Join(" ", args);
-            // try find a user with the username first
-            WFPlayer kickedplayer = GetAllPlayers().ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            // if there is no player with the username try find someone with that fisher ID
-            if (kickedplayer == null)
-                kickedplayer = GetAllPlayers().ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            if (kickedplayer == null)
-            {
-                SendPlayerChatMessage(player, "That's not a player!");
-            }
-            else
-            {
-                SendPlayerChatMessage(player, $"Kicked {kickedplayer.Username}");
-                KickPlayer(kickedplayer);
-                //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
-            }
-        });
-        SetCommandDescription("kick", "Kicks a player from the server");
-
-        RegisterCommand("ban", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            // hacky fix,
-            // Extract player name from the command message
-            string playerIdent = string.Join(" ", args);
-            // try find a user with the username first
-            WFPlayer playerToBan = GetAllPlayers().ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            // if there is no player with the username try find someone with that fisher ID
-            if (playerToBan == null)
-                playerToBan = GetAllPlayers().ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            if (playerToBan == null)
-            {
-                SendPlayerChatMessage(player, "Player not found!");
-            }
-            else
-            {
-                BanPlayer(playerToBan);
-                SendPlayerChatMessage(player, $"Banned {playerToBan.Username}");
-                SendGlobalChatMessage($"{playerToBan.Username} has been banned from the server.");
-            }
-        });
-        SetCommandDescription("ban", "Bans a player from the server");
-        */
-
         RegisterCommand("setjoinable", (player, args) =>
         {
             if (!IsPlayerAdmin(player)) return;
@@ -285,6 +237,26 @@ public class ChatCommands : CovePlugin
             SendPlayerChatMessage(player, message);
         });
         SetCommandDescription("plugins", "Shows all loaded plugins");
+        
+        RegisterCommand("steam", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+            // Get the command arguments
+            if (args.Length == 0)
+            {
+                SendPlayerChatMessage(player, "Username or Fisher ID required!");
+                return;
+            }
+            
+            var playerIdent = string.Join(" ", args);
+            var plr = Server.GetPlayer(playerIdent);
+            if (plr == null)
+            {
+                SendPlayerChatMessage(player, $"No player found with username or Fisher ID \"{playerIdent}\"");
+                return;
+            }
+            SendPlayerChatMessage(player, $"{plr.Username}: {plr.FisherID} - SteamID: {plr.SteamId.m_SteamID}");
+        });
     }
 
     private List<WFPlayer> lastToUseChalk = new();
