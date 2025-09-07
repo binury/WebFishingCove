@@ -49,6 +49,13 @@ namespace Cove.Server
         {
             string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
 
+            // check if the file exists
+            if (!File.Exists(fileDir))
+            {
+                File.Create(fileDir).Close();
+                return false; // no one is banned yet
+            }
+            
             string[] fileContent = File.ReadAllLines(fileDir);
             foreach (string line in fileContent)
             {
