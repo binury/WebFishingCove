@@ -25,29 +25,44 @@ public class ChatCommands : CovePlugin
             // Get the command arguments
             int pageNumber = 1;
             int pageSize = 10;
-            // Check if a page number was provided
-            if (args.Length > 0)
+
+            // Arg[0] = page
+            if (args.Length > 0 && (!int.TryParse(args[0], out pageNumber) || pageNumber < 1))
+                pageNumber = 1;
+            
+            // Arg[1] = page size (optional)
+            if (args.Length > 1 && int.TryParse(args[1], out int customSize) && customSize > 0 && customSize <= 100)
+                pageSize = customSize;
+            
+            var allPlayers = GetAllPlayers()
+                .OrderBy(p => p.Username, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(p => p.FisherID, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            int totalPlayers = allPlayers.Count;
+            if (totalPlayers == 0)
             {
-                if (!int.TryParse(args[0], out pageNumber) || pageNumber < 1)
-                {
-                    pageNumber = 1; // Default to page 1 if parsing fails or page number is less than 1
-                }
+                // server only response
+                SendPlayerChatMessage(player, "No players online.");
+                return;
             }
-            var allPlayers = GetAllPlayers();
-            int totalPlayers = allPlayers.Length;
-            int totalPages = (int)Math.Ceiling((double)totalPlayers / pageSize);
+            
+            int totalPages = (int)Math.Ceiling(totalPlayers / (double)pageSize);
+            if (totalPages == 0) totalPages = 1; // safety
+            
             // Ensure the page number is within the valid range
             if (pageNumber > totalPages) pageNumber = totalPages;
-            // Get the players for the current page
-            var playersOnPage = allPlayers.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            // Build the message to send
-            string messageBody = "";
-            foreach (var iPlayer in playersOnPage)
-            {
-                messageBody += $"\n{iPlayer.Username}: {iPlayer.FisherID}";
-            }
-            messageBody += $"\nPage {pageNumber} of {totalPages}";
-            SendPlayerChatMessage(player, "Players in the server:" + messageBody + "\nAlways here - Cove");
+            if (pageNumber < 1) pageNumber = 1;
+
+            int skip = (pageNumber - 1) * pageSize;
+            var playersOnPage = allPlayers.Skip(skip).Take(pageSize);
+            
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Players in the server:");
+            foreach (var p in playersOnPage)
+                sb.AppendLine($"{p.Username}: {p.FisherID}");
+
+            sb.Append($"Page {pageNumber} of {totalPages} (Total: {totalPlayers})");
+            SendPlayerChatMessage(player, sb.ToString());
         });
         SetCommandDescription("users", "Shows all players in the server");
 
@@ -95,54 +110,6 @@ public class ChatCommands : CovePlugin
             }
         });
         SetCommandDescription("spawn", "Spawns an actor");
-
-        /*
-        RegisterCommand("kick", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            string playerIdent = string.Join(" ", args);
-            // try find a user with the username first
-            WFPlayer kickedplayer = GetAllPlayers().ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            // if there is no player with the username try find someone with that fisher ID
-            if (kickedplayer == null)
-                kickedplayer = GetAllPlayers().ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            if (kickedplayer == null)
-            {
-                SendPlayerChatMessage(player, "That's not a player!");
-            }
-            else
-            {
-                SendPlayerChatMessage(player, $"Kicked {kickedplayer.Username}");
-                KickPlayer(kickedplayer);
-                //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
-            }
-        });
-        SetCommandDescription("kick", "Kicks a player from the server");
-
-        RegisterCommand("ban", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            // hacky fix,
-            // Extract player name from the command message
-            string playerIdent = string.Join(" ", args);
-            // try find a user with the username first
-            WFPlayer playerToBan = GetAllPlayers().ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            // if there is no player with the username try find someone with that fisher ID
-            if (playerToBan == null)
-                playerToBan = GetAllPlayers().ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-            if (playerToBan == null)
-            {
-                SendPlayerChatMessage(player, "Player not found!");
-            }
-            else
-            {
-                BanPlayer(playerToBan);
-                SendPlayerChatMessage(player, $"Banned {playerToBan.Username}");
-                SendGlobalChatMessage($"{playerToBan.Username} has been banned from the server.");
-            }
-        });
-        SetCommandDescription("ban", "Bans a player from the server");
-        */
 
         RegisterCommand("setjoinable", (player, args) =>
         {
@@ -252,6 +219,8 @@ public class ChatCommands : CovePlugin
 
             Server.loadedPlugins.Clear(); // clear the list
 
+            Server.RegisterDefaultCommands(); // re-register default commands
+            
             Server.loadAllPlugins(true); // reload all plugins
 
             SendPlayerChatMessage(player, "Plugins have been reloaded!");
@@ -269,6 +238,26 @@ public class ChatCommands : CovePlugin
             SendPlayerChatMessage(player, message);
         });
         SetCommandDescription("plugins", "Shows all loaded plugins");
+        
+        RegisterCommand("steam", (player, args) =>
+        {
+            if (!IsPlayerAdmin(player)) return;
+            // Get the command arguments
+            if (args.Length == 0)
+            {
+                SendPlayerChatMessage(player, "Username or Fisher ID required!");
+                return;
+            }
+            
+            var playerIdent = string.Join(" ", args);
+            var plr = Server.GetPlayer(playerIdent);
+            if (plr == null)
+            {
+                SendPlayerChatMessage(player, $"No player found with username or Fisher ID \"{playerIdent}\"");
+                return;
+            }
+            SendPlayerChatMessage(player, $"{plr.Username}: {plr.FisherID} - SteamID: {plr.SteamId.m_SteamID}");
+        });
     }
 
     private List<WFPlayer> lastToUseChalk = new();
