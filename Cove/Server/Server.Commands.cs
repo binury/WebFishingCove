@@ -34,6 +34,16 @@ namespace Cove.Server
     {
         List<RegisteredCommand> Commands = [];
 
+        private WFPlayer getPlayer(string playerIdent)
+        {
+            var selectedPlayer = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+            // if there is no player with the username try to find someone with that fisher ID
+            if (selectedPlayer == null)
+                selectedPlayer = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                
+            return selectedPlayer;
+        }
+        
         public void RegisterDefaultCommands()
         {
             RegisterCommand("help", (player, args) =>
@@ -68,10 +78,17 @@ namespace Cove.Server
                 if (!isPlayerAdmin(player.SteamId)) return;
                 string playerIdent = string.Join(" ", args);
                 // try find a user with the username first
-                WFPlayer kickedplayer = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-                // if there is no player with the username try find someone with that fisher ID
-                if (kickedplayer == null)
-                    kickedplayer = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                var kickedplayer = getPlayer(playerIdent);
+                
+                if (kickedplayer == null && System.Text.RegularExpressions.Regex.IsMatch(playerIdent, @"^7656119\d{10}$"))
+                {
+                    // if it is a steam ID, try to find the player by steam ID
+                    CSteamID steamId = new CSteamID(Convert.ToUInt64(playerIdent));
+                    messagePlayer($"Kicked {kickedplayer.Username}", player.SteamId);
+                    kickPlayer(steamId);
+                    return;
+                }
+                
                 if (kickedplayer == null)
                 {
                     messagePlayer("That's not a player!" , player.SteamId);
@@ -80,7 +97,6 @@ namespace Cove.Server
                 {
                     messagePlayer($"Kicked {kickedplayer.Username}", player.SteamId);
                     kickPlayer(kickedplayer.SteamId);
-                    //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
                 }
             });
             SetCommandDescription("kick", "Kicks a player from the server");
@@ -92,30 +108,23 @@ namespace Cove.Server
                 // Extract player name from the command message
                 string playerIdent = string.Join(" ", args);
                 // try to find a user with the username first
-                var playerToBan = AllPlayers.ToList().Find(p => p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-                // if there is no player with the username try to find someone with that fisher ID
-                if (playerToBan == null)
-                    playerToBan = AllPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                var playerToBan = getPlayer(playerIdent);
                 
-                // this could be programmed better, but it works
-                if (playerToBan == null)
+                var previousPlayer = PreviousPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                if (previousPlayer != null)
                 {
-                    var previousPlayer = PreviousPlayers.ToList().Find(p => p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-                    if (previousPlayer != null)
-                    {
-                        messagePlayer($"There is a previous player with that name, if you meant to ban them add a # before the ID: #{playerIdent}", player.SteamId);
-                        return;
-                    }
+                    messagePlayer($"There is a previous player with that name, if you meant to ban them add a # before the ID: #{playerIdent}", player.SteamId);
+                    return;
+                }
                     
-                    previousPlayer = PreviousPlayers.ToList().Find(p => $"#{p.FisherID}".Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
-                    if (previousPlayer != null)
+                previousPlayer = PreviousPlayers.ToList().Find(p => $"#{p.FisherID}".Equals(playerIdent, StringComparison.OrdinalIgnoreCase));
+                if (previousPlayer != null)
+                {
+                    playerToBan = new WFPlayer(previousPlayer.SteamId, previousPlayer.Username, new SteamNetworkingIdentity())
                     {
-                        playerToBan = new WFPlayer(previousPlayer.SteamId, previousPlayer.Username, new SteamNetworkingIdentity())
-                        {
-                            FisherID = previousPlayer.FisherID,
-                            Username = previousPlayer.Username,
-                        };
-                    }
+                        FisherID = previousPlayer.FisherID,
+                        Username = previousPlayer.Username,
+                    };
                 }
                 
                 // use regex to check if its a steam ID
