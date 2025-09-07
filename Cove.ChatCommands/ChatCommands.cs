@@ -25,29 +25,44 @@ public class ChatCommands : CovePlugin
             // Get the command arguments
             int pageNumber = 1;
             int pageSize = 10;
-            // Check if a page number was provided
-            if (args.Length > 0)
+
+            // Arg[0] = page
+            if (args.Length > 0 && (!int.TryParse(args[0], out pageNumber) || pageNumber < 1))
+                pageNumber = 1;
+            
+            // Arg[1] = page size (optional)
+            if (args.Length > 1 && int.TryParse(args[1], out int customSize) && customSize > 0 && customSize <= 100)
+                pageSize = customSize;
+            
+            var allPlayers = GetAllPlayers()
+                .OrderBy(p => p.Username, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(p => p.FisherID, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            int totalPlayers = allPlayers.Count;
+            if (totalPlayers == 0)
             {
-                if (!int.TryParse(args[0], out pageNumber) || pageNumber < 1)
-                {
-                    pageNumber = 1; // Default to page 1 if parsing fails or page number is less than 1
-                }
+                // server only response
+                SendPlayerChatMessage(player, "No players online.");
+                return;
             }
-            var allPlayers = GetAllPlayers();
-            int totalPlayers = allPlayers.Length;
-            int totalPages = (int)Math.Ceiling((double)totalPlayers / pageSize);
+            
+            int totalPages = (int)Math.Ceiling(totalPlayers / (double)pageSize);
+            if (totalPages == 0) totalPages = 1; // safety
+            
             // Ensure the page number is within the valid range
             if (pageNumber > totalPages) pageNumber = totalPages;
-            // Get the players for the current page
-            var playersOnPage = allPlayers.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            // Build the message to send
-            string messageBody = "";
-            foreach (var iPlayer in playersOnPage)
-            {
-                messageBody += $"\n{iPlayer.Username}: {iPlayer.FisherID}";
-            }
-            messageBody += $"\nPage {pageNumber} of {totalPages}";
-            SendPlayerChatMessage(player, "Players in the server:" + messageBody + "\nAlways here - Cove");
+            if (pageNumber < 1) pageNumber = 1;
+
+            int skip = (pageNumber - 1) * pageSize;
+            var playersOnPage = allPlayers.Skip(skip).Take(pageSize);
+            
+            var sb = new System.Text.StringBuilder();
+            sb.AppendLine("Players in the server:");
+            foreach (var p in playersOnPage)
+                sb.AppendLine($"{p.Username}: {p.FisherID}");
+
+            sb.Append($"Page {pageNumber} of {totalPages} (Total: {totalPlayers})");
+            SendPlayerChatMessage(player, sb.ToString());
         });
         SetCommandDescription("users", "Shows all players in the server");
 
