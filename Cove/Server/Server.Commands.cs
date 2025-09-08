@@ -23,8 +23,8 @@ namespace Cove.Server
             Command = command.ToLower();
             Description = description;
             Callback = callback;
-            Aliases ??= [];
-            Aliases = [.. Aliases.Select(alias => alias.ToLower())];
+            Aliases = aliases ?? [];
+            Aliases = [.. Aliases.Select(alias => alias.ToLower()).ToArray()];
         }
 
         public void Invoke(WFPlayer player, string[] args)

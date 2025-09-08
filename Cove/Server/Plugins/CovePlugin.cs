@@ -116,6 +116,16 @@ namespace Cove.Server.Plugins
             ParentServer.sendPacketToPlayers(packet);
         }
 
+        public void RegisterCommand(
+            string command,
+            Action<WFPlayer, string[]> callback,
+            string[]? aliases = null
+        )
+        {
+            ParentServer.RegisterCommand(command, callback, aliases);
+        }
+
+        /// Back-compat overload for existing plugins compiled against the older API
         public void RegisterCommand(string command, Action<WFPlayer, string[]> callback)
         {
             ParentServer.RegisterCommand(command, callback);
