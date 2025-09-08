@@ -1,12 +1,11 @@
-﻿using Cove.GodotFormat;
+﻿using System;
+using Cove.GodotFormat;
 using Serilog;
-using System;
 
 namespace Cove.Server.Chalk
 {
     public class ChalkCanvas
     {
-
         public long canvasID;
         public Dictionary<Vector2, int> chalkImage = new Dictionary<Vector2, int>();
 
@@ -28,7 +27,6 @@ namespace Cove.Server.Chalk
 
         public Dictionary<int, object> getChalkPacket()
         {
-
             Dictionary<int, object> packet = new Dictionary<int, object>();
             ulong i = 0;
             foreach (KeyValuePair<Vector2, int> entry in chalkImage.ToList())
@@ -59,9 +57,12 @@ namespace Cove.Server.Chalk
                 List<Vector2> expendedPixels = new List<Vector2>(chalkImage.Keys);
                 for (int i = packet.Count; i >= 0; i--)
                 {
-                    Dictionary<int, object> arr = (Dictionary<int, object>)packet[i-1];
+                    Dictionary<int, object> arr = (Dictionary<int, object>)packet[i - 1];
                     Vector2 vector2 = (Vector2)arr[0];
-                    Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
+                    Vector2 pos = new Vector2(
+                        (int)Math.Round(vector2.x),
+                        (int)Math.Round(vector2.y)
+                    );
 
                     if (expendedPixels.Contains(pos))
                     {
@@ -72,8 +73,9 @@ namespace Cove.Server.Chalk
                     chalkImage[pos] = (int)((Int64)arr[1]);
                 }
 
-                Console.WriteLine("A packet that was passed to the Fallback function was processed successfully");
-
+                Console.WriteLine(
+                    "A packet that was passed to the Fallback function was processed successfully"
+                );
             }
             else
             {
@@ -81,7 +83,10 @@ namespace Cove.Server.Chalk
                 {
                     Dictionary<int, object> arr = (Dictionary<int, object>)packet[i];
                     Vector2 vector2 = (Vector2)arr[0];
-                    Vector2 pos = new Vector2((int)Math.Round(vector2.x), (int)Math.Round(vector2.y));
+                    Vector2 pos = new Vector2(
+                        (int)Math.Round(vector2.x),
+                        (int)Math.Round(vector2.y)
+                    );
 
                     chalkImage[pos] = (int)((Int64)arr[1]);
                 }

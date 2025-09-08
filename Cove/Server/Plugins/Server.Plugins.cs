@@ -1,6 +1,6 @@
-﻿using Cove.Server.Plugins;
+﻿using System.Reflection;
+using Cove.Server.Plugins;
 using Cove.Server.Utils;
-using System.Reflection;
 
 namespace Cove.Server
 {
@@ -9,15 +9,19 @@ namespace Cove.Server
         private bool arePluginsEnabled = false;
 
         public readonly List<PluginInstance> loadedPlugins = new List<PluginInstance>();
+
         public void loadAllPlugins(bool skipWarning = false)
         {
-            if (!arePluginsEnabled) return; // plugins are disabled!
+            if (!arePluginsEnabled)
+                return; // plugins are disabled!
 
             if (!skipWarning)
             {
                 Log("");
                 Log("------------ WARNING ------------");
-                Log("YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE");
+                Log(
+                    "YOU HAVE ENABLED PLUGINS, PLUGINS RUN CODE THAT IS NOT APPROVED OR MADE BY COVE"
+                );
                 Log("ANY AND ALL DAMMAGE TO YOUR COMPUTER IS YOU AND YOUR FAULT ALONE");
                 Log("DO NOT RUN ANY UNTRUSTED PLUGINS!");
                 Log("IF YOU ARE RUNNING UNTRUSTED PLUGINS EXIT COVE NOW");
@@ -38,7 +42,8 @@ namespace Cove.Server
             {
                 try
                 {
-                    AssemblyName thisFile = AssemblyName.GetAssemblyName(fileName); ;
+                    AssemblyName thisFile = AssemblyName.GetAssemblyName(fileName);
+                    ;
                     pluginAssemblys.Add(Assembly.LoadFrom(fileName));
                 }
                 catch (BadImageFormatException)
@@ -63,11 +68,20 @@ namespace Cove.Server
                         CovePlugin plugin = instance as CovePlugin;
                         if (plugin != null)
                         {
-                            string pluginConfig = readConfigFromPlugin($"{assembly.GetName().Name}.plugin.cfg", assembly);
-                            if (pluginConfig == string.Empty) continue; // no config file found, its probably not a plugin
+                            string pluginConfig = readConfigFromPlugin(
+                                $"{assembly.GetName().Name}.plugin.cfg",
+                                assembly
+                            );
+                            if (pluginConfig == string.Empty)
+                                continue; // no config file found, its probably not a plugin
                             Dictionary<string, string> config = ConfigReader.ReadFile(pluginConfig);
 
-                            PluginInstance thisInstance = new(plugin, config["name"], config["id"], config["author"]);
+                            PluginInstance thisInstance = new(
+                                plugin,
+                                config["name"],
+                                config["id"],
+                                config["author"]
+                            );
 
                             loadedPlugins.Add(thisInstance);
                             Log($"Plugin Init: {config["name"]}");

@@ -16,10 +16,8 @@
 
 namespace Cove.GodotFormat
 {
-
     public class GodotReader
     {
-
         public byte[] data;
         private BinaryReader reader;
         public Serilog.Core.Logger logger;
@@ -204,7 +202,6 @@ namespace Cove.GodotFormat
 
         private Dictionary<string, object> readDictionary()
         {
-
             Dictionary<string, object> dic = new Dictionary<string, object>();
 
             int elementCount = reader.ReadInt32() & 0x7FFFFFFF;
@@ -231,7 +228,5 @@ namespace Cove.GodotFormat
 
             return dic;
         }
-
     }
-
 }

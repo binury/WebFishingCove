@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,6 +43,6 @@ namespace Cove.GodotFormat
         ridValue = 16, // ns
         objectValue = 17, //ns
         dictionaryValue = 18,
-        arrayValue = 19
+        arrayValue = 19,
     }
 }

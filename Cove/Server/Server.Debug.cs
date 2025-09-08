@@ -37,6 +37,7 @@ namespace Cove.Server
                     Console.WriteLine($"{sub} {kvp.Key}: {kvp.Value}");
             }
         }
+
         public static void printArray(Dictionary<int, object> obj, string sub = "")
         {
             foreach (var kvp in obj)

@@ -14,14 +14,13 @@
    limitations under the License.
 */
 
-
-using Steamworks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Cove.GodotFormat;
+using Steamworks;
 
 namespace Cove.Server.Actor
 {
@@ -32,10 +31,17 @@ namespace Cove.Server.Actor
         public string Username { get; set; }
         public List<CSteamID> blockedPlayers = new List<CSteamID>();
         public SteamNetworkingIdentity identity;
-        public WFPlayer(CSteamID id, string fisherName, SteamNetworkingIdentity identity) : base(0, "player", Vector3.zero)
+
+        public WFPlayer(CSteamID id, string fisherName, SteamNetworkingIdentity identity)
+            : base(0, "player", Vector3.zero)
         {
             SteamId = id;
-            string randomID = new string(Enumerable.Range(0, 3).Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)]).ToArray());
+            string randomID = new string(
+                Enumerable
+                    .Range(0, 3)
+                    .Select(_ => "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[new Random().Next(36)])
+                    .ToArray()
+            );
             FisherID = randomID;
             Username = fisherName;
 
@@ -52,32 +58,27 @@ namespace Cove.Server.Actor
         InGame,
         Left,
     }
-    
+
     // Represents a player that was previously connected to the server
     public class PreviousPlayer
     {
         public CSteamID SteamId { get; set; }
         public string FisherID { get; set; }
         public string Username { get; set; }
-        
+
         public uint leftTimestamp { get; set; } = 0; // Timestamp when the player left, 0 if they are still connected
         public PlayerState State { get; set; } = PlayerState.InGame; // Current state of the player
-        
+
         public PreviousPlayer(CSteamID id, string fisherName, string FishID)
         {
             SteamId = id;
             FisherID = FishID;
             Username = fisherName;
         }
-        
+
         public static PreviousPlayer FromWFPlayer(WFPlayer player)
         {
-            return new PreviousPlayer(
-                player.SteamId,
-                player.Username,
-                player.FisherID
-            );
+            return new PreviousPlayer(player.SteamId, player.Username, player.FisherID);
         }
     }
-    
 }

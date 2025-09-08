@@ -1,13 +1,15 @@
-﻿using Cove.Server;
+﻿using System;
+using Cove.Server;
 using Cove.Server.Actor;
 using Cove.Server.Plugins;
 using Steamworks;
-using System;
 
 public class ChatCommands : CovePlugin
 {
     CoveServer Server { get; set; } // lol
-    public ChatCommands(CoveServer server) : base(server)
+
+    public ChatCommands(CoveServer server)
+        : base(server)
     {
         Server = server;
     }
@@ -19,81 +21,93 @@ public class ChatCommands : CovePlugin
     {
         base.onInit();
 
-        RegisterCommand("users", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            // Get the command arguments
-            int pageNumber = 1;
-            int pageSize = 10;
-            // Check if a page number was provided
-            if (args.Length > 0)
+        RegisterCommand(
+            "users",
+            (player, args) =>
             {
-                if (!int.TryParse(args[0], out pageNumber) || pageNumber < 1)
+                if (!IsPlayerAdmin(player))
+                    return;
+                // Get the command arguments
+                int pageNumber = 1;
+                int pageSize = 10;
+                // Check if a page number was provided
+                if (args.Length > 0)
                 {
-                    pageNumber = 1; // Default to page 1 if parsing fails or page number is less than 1
+                    if (!int.TryParse(args[0], out pageNumber) || pageNumber < 1)
+                    {
+                        pageNumber = 1; // Default to page 1 if parsing fails or page number is less than 1
+                    }
                 }
+                var allPlayers = GetAllPlayers();
+                int totalPlayers = allPlayers.Length;
+                int totalPages = (int)Math.Ceiling((double)totalPlayers / pageSize);
+                // Ensure the page number is within the valid range
+                if (pageNumber > totalPages)
+                    pageNumber = totalPages;
+                // Get the players for the current page
+                var playersOnPage = allPlayers.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+                // Build the message to send
+                string messageBody = "";
+                foreach (var iPlayer in playersOnPage)
+                {
+                    messageBody += $"\n{iPlayer.Username}: {iPlayer.FisherID}";
+                }
+                messageBody += $"\nPage {pageNumber} of {totalPages}";
+                SendPlayerChatMessage(
+                    player,
+                    "Players in the server:" + messageBody + "\nAlways here - Cove"
+                );
             }
-            var allPlayers = GetAllPlayers();
-            int totalPlayers = allPlayers.Length;
-            int totalPages = (int)Math.Ceiling((double)totalPlayers / pageSize);
-            // Ensure the page number is within the valid range
-            if (pageNumber > totalPages) pageNumber = totalPages;
-            // Get the players for the current page
-            var playersOnPage = allPlayers.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            // Build the message to send
-            string messageBody = "";
-            foreach (var iPlayer in playersOnPage)
-            {
-                messageBody += $"\n{iPlayer.Username}: {iPlayer.FisherID}";
-            }
-            messageBody += $"\nPage {pageNumber} of {totalPages}";
-            SendPlayerChatMessage(player, "Players in the server:" + messageBody + "\nAlways here - Cove");
-        });
+        );
         SetCommandDescription("users", "Shows all players in the server");
 
-        RegisterCommand("spawn", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            if (args.Length == 0)
+        RegisterCommand(
+            "spawn",
+            (player, args) =>
             {
-                SendPlayerChatMessage(player, "You didn't add an argument!");
-                return;
+                if (!IsPlayerAdmin(player))
+                    return;
+                if (args.Length == 0)
+                {
+                    SendPlayerChatMessage(player, "You didn't add an argument!");
+                    return;
+                }
+                var actorType = args[0].ToLower();
+                bool spawned = false;
+                switch (actorType)
+                {
+                    case "rain":
+                        Server.spawnRainCloud();
+                        spawned = true;
+                        break;
+                    case "fish":
+                        Server.spawnFish();
+                        spawned = true;
+                        break;
+                    case "meteor":
+                    case "meatball":
+                        spawned = true;
+                        Server.spawnFish("fish_spawn_alien");
+                        break;
+                    case "portal":
+                        Server.spawnVoidPortal();
+                        spawned = true;
+                        break;
+                    case "metal":
+                        Server.spawnMetal();
+                        spawned = true;
+                        break;
+                }
+                if (spawned)
+                {
+                    SendPlayerChatMessage(player, $"Spawned {actorType}");
+                }
+                else
+                {
+                    SendPlayerChatMessage(player, $"\"{actorType}\" is not a spawnable actor!");
+                }
             }
-            var actorType = args[0].ToLower();
-            bool spawned = false;
-            switch (actorType)
-            {
-                case "rain":
-                    Server.spawnRainCloud();
-                    spawned = true;
-                    break;
-                case "fish":
-                    Server.spawnFish();
-                    spawned = true;
-                    break;
-                case "meteor":
-                case "meatball":
-                    spawned = true;
-                    Server.spawnFish("fish_spawn_alien");
-                    break;
-                case "portal":
-                    Server.spawnVoidPortal();
-                    spawned = true;
-                    break;
-                case "metal":
-                    Server.spawnMetal();
-                    spawned = true;
-                    break;
-            }
-            if (spawned)
-            {
-                SendPlayerChatMessage(player, $"Spawned {actorType}");
-            }
-            else
-            {
-                SendPlayerChatMessage(player, $"\"{actorType}\" is not a spawnable actor!");
-            }
-        });
+        );
         SetCommandDescription("spawn", "Spawns an actor");
 
         /*
@@ -144,134 +158,165 @@ public class ChatCommands : CovePlugin
         SetCommandDescription("ban", "Bans a player from the server");
         */
 
-        RegisterCommand("setjoinable", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            string arg = args[0].ToLower();
-            if (arg == "true")
+        RegisterCommand(
+            "setjoinable",
+            (player, args) =>
             {
-                SteamMatchmaking.SetLobbyJoinable(Server.SteamLobby, true);
-                SendPlayerChatMessage(player, $"Opened lobby!");
-                if (!Server.codeOnly)
+                if (!IsPlayerAdmin(player))
+                    return;
+                string arg = args[0].ToLower();
+                if (arg == "true")
                 {
-                    SteamMatchmaking.SetLobbyData(Server.SteamLobby, "type", "public");
-                    SendPlayerChatMessage(player, $"Unhid server from server list");
+                    SteamMatchmaking.SetLobbyJoinable(Server.SteamLobby, true);
+                    SendPlayerChatMessage(player, $"Opened lobby!");
+                    if (!Server.codeOnly)
+                    {
+                        SteamMatchmaking.SetLobbyData(Server.SteamLobby, "type", "public");
+                        SendPlayerChatMessage(player, $"Unhid server from server list");
+                    }
+                }
+                else if (arg == "false")
+                {
+                    SteamMatchmaking.SetLobbyJoinable(Server.SteamLobby, false);
+                    SendPlayerChatMessage(player, $"Closed lobby!");
+                    if (!Server.codeOnly)
+                    {
+                        SteamMatchmaking.SetLobbyData(Server.SteamLobby, "type", "code_only");
+                        SendPlayerChatMessage(player, $"Hid server from server list");
+                    }
+                }
+                else
+                {
+                    SendPlayerChatMessage(player, $"\"{arg}\" is not true or false!");
                 }
             }
-            else if (arg == "false")
-            {
-                SteamMatchmaking.SetLobbyJoinable(Server.SteamLobby, false);
-                SendPlayerChatMessage(player, $"Closed lobby!");
-                if (!Server.codeOnly)
-                {
-                    SteamMatchmaking.SetLobbyData(Server.SteamLobby, "type", "code_only");
-                    SendPlayerChatMessage(player, $"Hid server from server list");
-                }
-            }
-            else
-            {
-                SendPlayerChatMessage(player, $"\"{arg}\" is not true or false!");
-            }
-        });
+        );
         SetCommandDescription("setjoinable", "Sets the lobby to joinable or not");
 
-        RegisterCommand("refreshadmins", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            Server.readAdmins();
-        });
+        RegisterCommand(
+            "refreshadmins",
+            (player, args) =>
+            {
+                if (!IsPlayerAdmin(player))
+                    return;
+                Server.readAdmins();
+            }
+        );
         SetCommandDescription("refreshadmins", "Refreshes the admin list");
 
-        RegisterCommand("uptime", (player, args) =>
-        {
-            long currentTime = DateTimeOffset.Now.ToUnixTimeSeconds();
-            long uptime = currentTime - serverStartTime;
-            TimeSpan time = TimeSpan.FromSeconds(uptime);
-            int days = time.Days;
-            int hours = time.Hours;
-            int minutes = time.Minutes;
-            int seconds = time.Seconds;
-            string uptimeString = "";
-            if (days > 0)
+        RegisterCommand(
+            "uptime",
+            (player, args) =>
             {
-                uptimeString += $"{days} Days, ";
+                long currentTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+                long uptime = currentTime - serverStartTime;
+                TimeSpan time = TimeSpan.FromSeconds(uptime);
+                int days = time.Days;
+                int hours = time.Hours;
+                int minutes = time.Minutes;
+                int seconds = time.Seconds;
+                string uptimeString = "";
+                if (days > 0)
+                {
+                    uptimeString += $"{days} Days, ";
+                }
+                if (hours > 0)
+                {
+                    uptimeString += $"{hours} Hours, ";
+                }
+                if (minutes > 0)
+                {
+                    uptimeString += $"{minutes} Minutes, ";
+                }
+                if (seconds > 0)
+                {
+                    uptimeString += $"{seconds} Seconds";
+                }
+                SendPlayerChatMessage(player, $"Server uptime: {uptimeString}");
             }
-            if (hours > 0)
-            {
-                uptimeString += $"{hours} Hours, ";
-            }
-            if (minutes > 0)
-            {
-                uptimeString += $"{minutes} Minutes, ";
-            }
-            if (seconds > 0)
-            {
-                uptimeString += $"{seconds} Seconds";
-            }
-            SendPlayerChatMessage(player, $"Server uptime: {uptimeString}");
-        });
+        );
         SetCommandDescription("uptime", "Shows the server uptime");
 
-        RegisterCommand("say", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            string message = string.Join(" ", args);
-            SendGlobalChatMessage($"[Server] {message}");
-        });
+        RegisterCommand(
+            "say",
+            (player, args) =>
+            {
+                if (!IsPlayerAdmin(player))
+                    return;
+                string message = string.Join(" ", args);
+                SendGlobalChatMessage($"[Server] {message}");
+            }
+        );
         SetCommandDescription("say", "Sends a message to all players");
 
-        RegisterCommand("chalkrecent", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-
-            // rearange the list so the most recent is first
-            List<WFPlayer> reversedList = new List<WFPlayer>(lastToUseChalk);
-            reversedList.Reverse();
-
-            string message = "Most recent chalk users:";
-            foreach (var p in reversedList)
+        RegisterCommand(
+            "chalkrecent",
+            (player, args) =>
             {
-                message += $"\n{p.Username}: {p.FisherID}";
-            }
+                if (!IsPlayerAdmin(player))
+                    return;
 
-            SendPlayerChatMessage(player, message);
-        });
+                // rearange the list so the most recent is first
+                List<WFPlayer> reversedList = new List<WFPlayer>(lastToUseChalk);
+                reversedList.Reverse();
+
+                string message = "Most recent chalk users:";
+                foreach (var p in reversedList)
+                {
+                    message += $"\n{p.Username}: {p.FisherID}";
+                }
+
+                SendPlayerChatMessage(player, message);
+            }
+        );
         SetCommandDescription("chalkrecent", "Shows the 10 most recent players to use chalk");
 
-        RegisterCommand("reload", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            
-            SendPlayerChatMessage(player, "Reloading plugins, this can cause unintended behaviour in plugins that don't cleanup properly");
-
-            foreach(PluginInstance plugin in Server.loadedPlugins)
+        RegisterCommand(
+            "reload",
+            (player, args) =>
             {
-                plugin.plugin.onEnd();
-                Log($"Unloaded plugin {plugin.plugin.GetType().Name}");
+                if (!IsPlayerAdmin(player))
+                    return;
+
+                SendPlayerChatMessage(
+                    player,
+                    "Reloading plugins, this can cause unintended behaviour in plugins that don't cleanup properly"
+                );
+
+                foreach (PluginInstance plugin in Server.loadedPlugins)
+                {
+                    plugin.plugin.onEnd();
+                    Log($"Unloaded plugin {plugin.plugin.GetType().Name}");
+                }
+
+                Server.loadedPlugins.Clear(); // clear the list
+
+                Server.loadAllPlugins(true); // reload all plugins
+
+                SendPlayerChatMessage(player, "Plugins have been reloaded!");
             }
-
-            Server.loadedPlugins.Clear(); // clear the list
-
-            Server.loadAllPlugins(true); // reload all plugins
-
-            SendPlayerChatMessage(player, "Plugins have been reloaded!");
-        });
+        );
         SetCommandDescription("reload", "Reloads all plugins");
 
-        RegisterCommand("plugins", (player, args) =>
-        {
-            if (!IsPlayerAdmin(player)) return;
-            string message = "Loaded plugins:";
-            foreach (PluginInstance plugin in Server.loadedPlugins)
+        RegisterCommand(
+            "plugins",
+            (player, args) =>
             {
-                message += $"\n{plugin.pluginName} - {plugin.pluginAuthor}";
+                if (!IsPlayerAdmin(player))
+                    return;
+                string message = "Loaded plugins:";
+                foreach (PluginInstance plugin in Server.loadedPlugins)
+                {
+                    message += $"\n{plugin.pluginName} - {plugin.pluginAuthor}";
+                }
+                SendPlayerChatMessage(player, message);
             }
-            SendPlayerChatMessage(player, message);
-        });
+        );
         SetCommandDescription("plugins", "Shows all loaded plugins");
     }
 
     private List<WFPlayer> lastToUseChalk = new();
+
     public override void onNetworkPacket(WFPlayer sender, Dictionary<string, object> packet)
     {
         base.onNetworkPacket(sender, packet);
@@ -279,7 +324,8 @@ public class ChatCommands : CovePlugin
         object value;
         if (packet.TryGetValue("type", out value))
         {
-            if (typeof(string) != value.GetType()) return;
+            if (typeof(string) != value.GetType())
+                return;
 
             string type = value as string;
             if (type == "chalk_packet")

@@ -14,12 +14,11 @@
    limitations under the License.
 */
 
-
-using Steamworks;
-using Cove.Server.Plugins;
 using Cove.GodotFormat;
 using Cove.Server.Actor;
+using Cove.Server.Plugins;
 using Cove.Server.Utils;
+using Steamworks;
 
 namespace Cove.Server
 {
@@ -82,7 +81,8 @@ namespace Cove.Server
 
         public WFActor spawnFish(string fishType = "fish_spawn")
         {
-            Vector3 pos = fish_points[(new Random()).Next(fish_points.Count)] + new Vector3(0,.08f,0);
+            Vector3 pos =
+                fish_points[(new Random()).Next(fish_points.Count)] + new Vector3(0, .08f, 0);
             WFActor actor = spawnGenericActor(fishType, pos);
             actor.despawn = true;
             actor.despawnTime = fishType == "fish_spawn" ? 80 : 120; // 80 for normal fish, 120 for alien fish
@@ -177,7 +177,8 @@ namespace Cove.Server
                     Dictionary<string, object> spawnPacket = new Dictionary<string, object>();
                     spawnPacket["type"] = "instance_actor";
 
-                    Dictionary<string, object> instanceSpacePrams = new Dictionary<string, object>();
+                    Dictionary<string, object> instanceSpacePrams =
+                        new Dictionary<string, object>();
                     spawnPacket["params"] = instanceSpacePrams;
 
                     instanceSpacePrams["actor_type"] = actor.Type;
@@ -219,9 +220,15 @@ namespace Cove.Server
         }
 
         // returns the letter id!
-        int SendLetter(CSteamID to, CSteamID from, string header, string body, string closing, string user)
+        int SendLetter(
+            CSteamID to,
+            CSteamID from,
+            string header,
+            string body,
+            string closing,
+            string user
+        )
         {
-
             // dosent work atm
             // return -1;
 
@@ -260,7 +267,8 @@ namespace Cove.Server
             // get all players in the lobby
             foreach (CSteamID member in getAllPlayers())
             {
-                if (member.m_SteamID == SteamUser.GetSteamID().m_SteamID) continue;
+                if (member.m_SteamID == SteamUser.GetSteamID().m_SteamID)
+                    continue;
                 sendPacketToPlayer(chatPacket, member);
             }
         }
@@ -338,12 +346,14 @@ namespace Cove.Server
             if (maskMaxPlayers && MaxPlayers > 12)
             {
                 if (AllPlayers.Count + 1 >= 12)
-                    SteamMatchmaking.SetLobbyData(SteamLobby, "cap", (AllPlayers.Count + 2).ToString());
+                    SteamMatchmaking.SetLobbyData(
+                        SteamLobby,
+                        "cap",
+                        (AllPlayers.Count + 2).ToString()
+                    );
                 if (AllPlayers.Count + 1 < 12)
                     SteamMatchmaking.SetLobbyData(SteamLobby, "cap", "12+");
             }
-            
-
         }
 
         public void disconnectAllPlayers()
@@ -368,7 +378,6 @@ namespace Cove.Server
 
         public void printPluginLog(string message, CovePlugin caller)
         {
-
             PluginInstance pluginInfo = loadedPlugins.Find(i => i.plugin == caller);
             Log($"[{pluginInfo.pluginName}] {message}");
         }

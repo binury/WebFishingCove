@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,8 +22,6 @@ using Cove.Server.Actor;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Steamworks;
-
-
 
 namespace Cove.Server.HostedServices
 {
@@ -56,11 +53,18 @@ namespace Cove.Server.HostedServices
         private void DoWork(object state)
         {
             // check that the host of the lobby is still the server
-            if (SteamMatchmaking.GetLobbyOwner(server.SteamLobby).m_SteamID != server.serverPlayer.SteamId.m_SteamID)
+            if (
+                SteamMatchmaking.GetLobbyOwner(server.SteamLobby).m_SteamID
+                != server.serverPlayer.SteamId.m_SteamID
+            )
             {
                 // somthing has gone wrong, the server is no longer the host of the lobby
-                server.logger.Fatal("The server is no longer the host of the lobby, shutting down.");
-                server.logger.Fatal("Make sure you have a good connection to steam, this happends when the server disconnects from steam");
+                server.logger.Fatal(
+                    "The server is no longer the host of the lobby, shutting down."
+                );
+                server.logger.Fatal(
+                    "Make sure you have a good connection to steam, this happends when the server disconnects from steam"
+                );
                 server.logger.Fatal("If your internet is unstable, this will happen often!");
 
                 // stop the server
@@ -70,7 +74,6 @@ namespace Cove.Server.HostedServices
             // remove old instances!
             try
             {
-
                 // if we are in a lobby, update the player count
                 if (server.SteamLobby.m_SteamID != 0)
                 {
@@ -82,7 +85,9 @@ namespace Cove.Server.HostedServices
                 {
                     foreach (WFActor inst in server.serverOwnedInstances.ToList())
                     {
-                        float instanceAge = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - inst.SpawnTime.ToUnixTimeSeconds();
+                        float instanceAge =
+                            DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                            - inst.SpawnTime.ToUnixTimeSeconds();
                         if (inst.despawn && instanceAge >= inst.despawnTime)
                         {
                             server.removeServerActor(inst);
@@ -119,7 +124,6 @@ namespace Cove.Server.HostedServices
 
                 switch (type)
                 {
-
                     case "none":
                         break;
 
@@ -141,7 +145,6 @@ namespace Cove.Server.HostedServices
                     case "void_portal":
                         server.spawnVoidPortal();
                         break;
-
                 }
 
                 // random neumber between 0 and 2 for 3 values
@@ -150,11 +153,10 @@ namespace Cove.Server.HostedServices
                 {
                     spawnBirds();
                 }
-
             }
             catch (Exception e)
             {
-                // most of the time this is just going to be an error 
+                // most of the time this is just going to be an error
                 // because the list was modified while iterating
                 // casued by a actorspawn or despawn, nothing huge.
                 _logger.LogError(e.ToString());
@@ -179,11 +181,16 @@ namespace Cove.Server.HostedServices
 
             for (int i = 0; i < count; i++)
             {
-                Vector3 pos = point + new Vector3(randomRange((float)-2.5,(float)2.5), 0, randomRange((float)-2.5, (float)2.5));
+                Vector3 pos =
+                    point
+                    + new Vector3(
+                        randomRange((float)-2.5, (float)2.5),
+                        0,
+                        randomRange((float)-2.5, (float)2.5)
+                    );
                 WFActor a = server.spawnGenericActor("ambient_bird", point);
                 a.despawnTime = 60;
             }
-
         }
 
         // This method is called when the service is stopping.
@@ -203,5 +210,4 @@ namespace Cove.Server.HostedServices
             _timer?.Dispose();
         }
     }
-
 }

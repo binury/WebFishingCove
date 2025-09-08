@@ -15,13 +15,17 @@ namespace Cove.Server.Utils
             {
                 bool assemblyHasConfig = false;
                 string resourceName = Assembly.GetExecutingAssembly().GetName().Name;
-                Assembly.GetExecutingAssembly().GetManifestResourceNames().ToList().ForEach(name =>
-                {
-                    if (name == resourceName + "." + fileName)
+                Assembly
+                    .GetExecutingAssembly()
+                    .GetManifestResourceNames()
+                    .ToList()
+                    .ForEach(name =>
                     {
-                        assemblyHasConfig = true;
-                    }
-                });
+                        if (name == resourceName + "." + fileName)
+                        {
+                            assemblyHasConfig = true;
+                        }
+                    });
                 if (assemblyHasConfig)
                 {
                     string fileContence = readFromAssembly(resourceName + "." + fileName);
@@ -35,15 +39,20 @@ namespace Cove.Server.Utils
                 }
                 else
                 {
-                    throw new Exception($"Cannot find config file that is trying to be read: {fileName}");
+                    throw new Exception(
+                        $"Cannot find config file that is trying to be read: {fileName}"
+                    );
                 }
             }
         }
 
         private static string readFromAssembly(string fileIdentifyer)
         {
-
-            using (Stream fileStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(fileIdentifyer))
+            using (
+                Stream fileStream = Assembly
+                    .GetExecutingAssembly()
+                    .GetManifestResourceStream(fileIdentifyer)
+            )
             {
                 if (fileStream != null)
                 {
@@ -51,14 +60,12 @@ namespace Cove.Server.Utils
                     string content = reader.ReadToEnd();
 
                     return content;
-
                 }
                 else
                 {
                     throw new Exception("Cant file file in sssembly!");
                 }
             }
-
         }
 
         public static Dictionary<string, string> ReadFile(string fileContent)
@@ -77,7 +84,6 @@ namespace Cove.Server.Utils
 
                 string[] parts = line.Split("=");
                 configValues[parts[0].Trim()] = parts[1].Trim();
-
             }
 
             return configValues;

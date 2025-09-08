@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +23,8 @@ using Cove.Server.Plugins;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-
 namespace Cove.Server.HostedServices
 {
-
     public class ActorUpdateService : IHostedService, IDisposable
     {
         private readonly ILogger<ActorUpdateService> _logger;
@@ -60,10 +57,8 @@ namespace Cove.Server.HostedServices
         {
             updateI++;
 
-
             try
             {
-
                 foreach (PluginInstance plugin in server.loadedPlugins)
                 {
                     plugin.plugin.onUpdate();
@@ -80,9 +75,11 @@ namespace Cove.Server.HostedServices
                             pastTransforms[actor.InstanceID] = Vector3.zero;
                         }
 
-                        if (actor.pos != pastTransforms[actor.InstanceID] || (updateI == idelUpdateCount))
+                        if (
+                            actor.pos != pastTransforms[actor.InstanceID]
+                            || (updateI == idelUpdateCount)
+                        )
                         {
-
                             Dictionary<string, object> packet = new Dictionary<string, object>();
                             packet["type"] = "actor_update";
                             packet["actor_id"] = actor.InstanceID;
@@ -109,7 +106,6 @@ namespace Cove.Server.HostedServices
             {
                 updateI = 0;
             }
-
         }
 
         // This method is called when the service is stopping.
@@ -129,5 +125,4 @@ namespace Cove.Server.HostedServices
             _timer?.Dispose();
         }
     }
-
 }

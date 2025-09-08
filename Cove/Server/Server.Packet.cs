@@ -14,16 +14,15 @@
    limitations under the License.
 */
 
-using Steamworks;
 using Cove.GodotFormat;
 using Cove.Server.Actor;
 using Cove.Server.Utils;
+using Steamworks;
 
 namespace Cove.Server
 {
     partial class CoveServer
     {
-
         // TODO: Make this a switch statement
         void OnNetworkPacket(byte[] packet, CSteamID sender)
         {
@@ -73,27 +72,46 @@ namespace Cove.Server
 
                 case "instance_actor":
                     {
-                        string type = (string)((Dictionary<string, object>)packetInfo["params"])["actor_type"];
-                        long actorID = (long)((Dictionary<string, object>)packetInfo["params"])["actor_id"];
+                        string type = (string)
+                            ((Dictionary<string, object>)packetInfo["params"])["actor_type"];
+                        long actorID = (long)
+                            ((Dictionary<string, object>)packetInfo["params"])["actor_id"];
 
                         // all actor types that should not be spawned by anyone but the server!
-                        List<string> illegalTypes = ["fish_spawn_alien", "fish_spawn", "raincloud", "ambient_bird", "void_portal", "metal_spawn"];
+                        List<string> illegalTypes =
+                        [
+                            "fish_spawn_alien",
+                            "fish_spawn",
+                            "raincloud",
+                            "ambient_bird",
+                            "void_portal",
+                            "metal_spawn",
+                        ];
 
                         // if the server owner dosent want players to spawn canvas's then add it to the list
                         if (!playersCanSpawnCanvas)
                             illegalTypes.Add("canvas");
 
-                        if (Array.LastIndexOf(illegalTypes.ToArray(), type) > -1 && !isPlayerAdmin(sender))
+                        if (
+                            Array.LastIndexOf(illegalTypes.ToArray(), type) > -1
+                            && !isPlayerAdmin(sender)
+                        )
                         {
                             kickPlayer(sender);
 
-                            WFPlayer offendingPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
-                            messageGlobal($"{offendingPlayer.Username} was kicked for spawning illegal actors");
+                            WFPlayer offendingPlayer = AllPlayers.Find(p =>
+                                p.SteamId.m_SteamID == sender.m_SteamID
+                            );
+                            messageGlobal(
+                                $"{offendingPlayer.Username} was kicked for spawning illegal actors"
+                            );
                         }
 
                         if (type == "player")
                         {
-                            WFPlayer thisPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
+                            WFPlayer thisPlayer = AllPlayers.Find(p =>
+                                p.SteamId.m_SteamID == sender.m_SteamID
+                            );
                             if (thisPlayer == null)
                                 Log("No fisher found for player instance!");
                             else
@@ -102,25 +120,29 @@ namespace Cove.Server
                                 allActors.Add(thisPlayer); // add the player to the actor list
 
                                 // print out a join message
-                                Log($"[{thisPlayer.FisherID}] {thisPlayer.Username} joined. [{AllPlayers.Count}/{MaxPlayers}]");
+                                Log(
+                                    $"[{thisPlayer.FisherID}] {thisPlayer.Username} joined. [{AllPlayers.Count}/{MaxPlayers}]"
+                                );
                                 sendWebLobbyPacket(thisPlayer.SteamId);
                                 updatePlayercount();
 
                                 loadedPlugins.ForEach(p => p.plugin.onPlayerJoin(thisPlayer));
                             }
-
-                        } else {
+                        }
+                        else
+                        {
                             WFActor cActor = new WFActor(actorID, type, Vector3.zero, Vector3.zero);
                             cActor.owner = sender;
                             allActors.Add(cActor);
                         }
-
                     }
                     break;
 
                 case "actor_update":
                     {
-                        WFPlayer thisPlayer = AllPlayers.Find(p => p.InstanceID == (long)packetInfo["actor_id"]);
+                        WFPlayer thisPlayer = AllPlayers.Find(p =>
+                            p.InstanceID == (long)packetInfo["actor_id"]
+                        );
                         if (thisPlayer != null)
                         {
                             Vector3 position = (Vector3)packetInfo["pos"];
@@ -144,8 +166,11 @@ namespace Cove.Server
                     {
                         if ((string)packetInfo["action"] == "_wipe_actor")
                         {
-                            long actorToWipe = (long)((Dictionary<int, object>)packetInfo["params"])[0];
-                            WFActor serverInst = serverOwnedInstances.Find(i => i.InstanceID == actorToWipe);
+                            long actorToWipe = (long)
+                                ((Dictionary<int, object>)packetInfo["params"])[0];
+                            WFActor serverInst = serverOwnedInstances.Find(i =>
+                                i.InstanceID == actorToWipe
+                            );
                             if (serverInst != null)
                             {
                                 // stop players from removing rain clouds
@@ -175,13 +200,11 @@ namespace Cove.Server
 
                         if (canvas == null)
                         {
-                            
                             canvas = new Chalk.ChalkCanvas(canvasID);
                             chalkCanvas.Add(canvas);
                         }
 
                         canvas.chalkUpdate((Dictionary<int, object>)packetInfo["data"]);
-
                     }
                     break;
 
@@ -198,14 +221,16 @@ namespace Cove.Server
                         {
                             // Because it's easier I'm just gonna replace the %u with the player's name
                             // and use that as the message content
-                            var thisPlayer = AllPlayers.Find(p => p.SteamId.m_SteamID == sender.m_SteamID);
-                            if (thisPlayer == null) return;
+                            var thisPlayer = AllPlayers.Find(p =>
+                                p.SteamId.m_SteamID == sender.m_SteamID
+                            );
+                            if (thisPlayer == null)
+                                return;
                             string playerMessage = Message.Replace("%u", thisPlayer.Username);
                             OnPlayerChat(playerMessage, sender);
                         }
                     }
                     break;
-
             }
         }
 
@@ -239,7 +264,12 @@ namespace Cove.Server
 
                     for (int index = 0; index < chunks.Count; index++)
                     {
-                        Dictionary<string, object> chalkPacket = new Dictionary<string, object> { { "type", "chalk_packet" }, { "canvas_id", canvas.canvasID }, { "data", chunks[index] } };
+                        Dictionary<string, object> chalkPacket = new Dictionary<string, object>
+                        {
+                            { "type", "chalk_packet" },
+                            { "canvas_id", canvas.canvasID },
+                            { "data", chunks[index] },
+                        };
                         sendPacketToPlayer(chalkPacket, recipient);
                         Thread.Sleep(10);
                     }

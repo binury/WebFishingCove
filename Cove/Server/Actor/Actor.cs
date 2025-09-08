@@ -14,9 +14,8 @@
    limitations under the License.
 */
 
-
-using Steamworks;
 using Cove.GodotFormat;
+using Steamworks;
 
 namespace Cove.Server.Actor
 {
@@ -48,9 +47,6 @@ namespace Cove.Server.Actor
                 rot = Vector3.zero;
         }
 
-        public virtual void onUpdate()
-        {
-
-        }
+        public virtual void onUpdate() { }
     }
 }

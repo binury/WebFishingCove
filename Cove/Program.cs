@@ -16,9 +16,8 @@
 
 using Cove.Server;
 using Cove.Server.Actor;
-using Steamworks;
 using Serilog;
-
+using Steamworks;
 
 long epoch = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
@@ -28,7 +27,7 @@ var serverLogger = new LoggerConfiguration()
     .CreateLogger();
 
 //Console.SetOut(new SerilogTextWriter(serverLogger));
-//Console.SetError(new SerilogTextWriter(serverLogger, true));  
+//Console.SetError(new SerilogTextWriter(serverLogger, true));
 
 CoveServer webfishingServer = new CoveServer();
 webfishingServer.logger = serverLogger;
@@ -36,7 +35,8 @@ try
 {
     serverLogger.Information("Starting server...");
     webfishingServer.Init(); // start the server
-} catch (Exception e)
+}
+catch (Exception e)
 {
     serverLogger.Fatal("Error occored on main thread");
     serverLogger.Fatal(e.ToString());
@@ -79,5 +79,4 @@ while (true)
     }
     else
         Log("Command not found!");
-
 }

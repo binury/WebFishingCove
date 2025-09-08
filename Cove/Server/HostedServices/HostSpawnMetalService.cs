@@ -14,13 +14,13 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Steamworks;
+
 namespace Cove.Server.HostedServices
 {
     public class HostSpawnMetalService : IHostedService, IDisposable
@@ -55,7 +55,9 @@ namespace Cove.Server.HostedServices
                 //server.gameLobby.SetData("server_browser_value", "0");
                 SteamMatchmaking.SetLobbyData(server.SteamLobby, "server_browser_value", "0");
 
-                int metalCount = server.serverOwnedInstances.FindAll(a => a.Type == "metal_spawn").Count;
+                int metalCount = server
+                    .serverOwnedInstances.FindAll(a => a.Type == "metal_spawn")
+                    .Count;
                 if (metalCount > 7)
                     return;
 

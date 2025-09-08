@@ -14,6 +14,5 @@
             this.pluginID = id;
             this.pluginAuthor = author;
         }
-
     }
 }

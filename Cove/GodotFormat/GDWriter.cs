@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +24,6 @@ namespace Cove.GodotFormat
 {
     public class GodotWriter
     {
-
         public static byte[] WriteGodotPacket(Dictionary<string, object> packet)
         {
             MemoryStream stream = new MemoryStream();
@@ -77,10 +75,12 @@ namespace Cove.GodotFormat
             else if (packet is Vector3)
             {
                 writeVector3((Vector3)packet, bw);
-            } else if (packet is Vector2)
+            }
+            else if (packet is Vector2)
             {
                 writeVector2((Vector2)packet, bw);
-            } else
+            }
+            else
             {
                 throw new Exception("Unknown type: " + packet.GetType());
             }
@@ -129,7 +129,7 @@ namespace Cove.GodotFormat
 
         private static void writeDouble(Double packet, BinaryWriter writer)
         {
-            writer.Write((int)65539);// write the float value header! this is the same as above but with the 64 bit header!
+            writer.Write((int)65539); // write the float value header! this is the same as above but with the 64 bit header!
             writer.Write((Double)packet);
         }
 

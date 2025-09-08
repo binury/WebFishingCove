@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +29,11 @@ namespace Cove.Server
     {
         public void banPlayer(CSteamID id, bool saveToFile = false, string banReason = "")
         {
-            var player = new WFPlayer(id, Steamworks.SteamFriends.GetFriendPersonaName(id), new SteamNetworkingIdentity());
+            var player = new WFPlayer(
+                id,
+                Steamworks.SteamFriends.GetFriendPersonaName(id),
+                new SteamNetworkingIdentity()
+            );
 
             Dictionary<string, object> banPacket = new();
             banPacket["type"] = "client_was_banned";
@@ -40,7 +43,6 @@ namespace Cove.Server
             leftPacket["type"] = "peer_was_banned";
             leftPacket["user_id"] = (long)id.m_SteamID;
             sendPacketToPlayers(leftPacket);
-
 
             foreach (PluginInstance plugin in loadedPlugins)
             {
