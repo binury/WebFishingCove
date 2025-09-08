@@ -247,7 +247,9 @@ namespace Cove.Server
 
         public RegisteredCommand? FindCommand(string name)
         {
-            return Commands.Find(c => c.Command == name || c.Aliases.Contains(name));
+            return Commands.Find(c =>
+                c.Command == name.ToLower() || c.Aliases.Contains(name.ToLower())
+            );
         }
     }
 }
