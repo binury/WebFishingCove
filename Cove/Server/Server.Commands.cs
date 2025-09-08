@@ -62,7 +62,7 @@ namespace Cove.Server
             });
             SetCommandDescription("help", "Shows all commands");
 
-            RegisterCommand("exit", (player, args) =>
+            RegisterCommand(command: "exit", aliases: ["shutdown"], cb: (player, args) =>
             {
                 // make sure the player is the host
                 if (player.SteamId != serverPlayer.SteamId)
@@ -163,7 +163,7 @@ namespace Cove.Server
             });
             SetCommandDescription("ban", "Bans a player from the server");
 
-            RegisterCommand("prev", (player, args) =>
+            RegisterCommand(command:"prev", aliases: ["recent"], cb: (player, args) =>
             {
                 if (!isPlayerAdmin(player.SteamId)) return;
                 var sb = new StringBuilder();

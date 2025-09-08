@@ -106,9 +106,9 @@ namespace Cove.Server.Plugins
             ParentServer.sendPacketToPlayers(packet);
         }
 
-        public void RegisterCommand(string command, Action<WFPlayer, string[]> callback)
+        public void RegisterCommand(string command, Action<WFPlayer, string[]> callback, string[]? aliases = null)
         {
-            ParentServer.RegisterCommand(command, callback);
+            ParentServer.RegisterCommand(command, callback, aliases);
         }
 
         public void SetCommandDescription(string command, string description)
@@ -125,6 +125,5 @@ namespace Cove.Server.Plugins
         {
             return ParentServer.DoseCommandExist(command);
         }
-
     }
 }
