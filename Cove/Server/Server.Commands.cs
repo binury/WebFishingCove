@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using Cove.Server.Actor;
 using Cove.Server.Utils;
 using Steamworks;
@@ -10,16 +11,20 @@ namespace Cove.Server
         public string Command;
         public string Description;
         public Action<WFPlayer, string[]> Callback;
+        public string[] Aliases;
 
         public RegisteredCommand(
             string command,
             string description,
-            Action<WFPlayer, string[]> callback
+            Action<WFPlayer, string[]> callback,
+            string[]? aliases = null
         )
         {
-            Command = command.ToLower(); // make sure its lower case to not mess anything up
+            Command = command.ToLower();
             Description = description;
             Callback = callback;
+            Aliases ??= [];
+            Aliases = (string[])Aliases.Select(alias => alias.ToLower());
         }
 
         public void Invoke(WFPlayer player, string[] args)
@@ -62,9 +67,10 @@ namespace Cove.Server
                     messagePlayer("Server is shutting down!", player.SteamId);
 
                     Stop(); // stop the server
-                }
+                },
+                ["shutdown"]
             );
-            SetCommandDescription("exit", "Shuts down the server (host only)");
+            SetCommandDescription("exit", "Shuts down the server");
 
             RegisterCommand(
                 "kick",
@@ -249,8 +255,9 @@ namespace Cove.Server
             );
 
             RegisterCommand(
-                "prev",
-                (player, args) =>
+                command: "prev",
+                aliases: ["recent"],
+                cb: (player, args) =>
                 {
                     if (!isPlayerAdmin(player.SteamId))
                         return;
@@ -289,15 +296,26 @@ namespace Cove.Server
             );
         }
 
-        public void RegisterCommand(string command, Action<WFPlayer, string[]> cb)
+        public void RegisterCommand(
+            string command,
+            Action<WFPlayer, string[]> cb,
+            string[]? aliases = null
+        )
         {
+            aliases ??= [];
+
             if (Commands.Any(c => c.Command == command))
             {
                 Log($"Command '{command}' is already registerd!");
                 return;
             }
+            else if (aliases.Any(alias => Commands.Find(c => c.Aliases.Contains(alias)) != null))
+            {
+                Log($"'{command}' has an alias that is already registerd elsewhere!");
+                return;
+            }
 
-            Commands.Add(new RegisteredCommand(command, "", cb));
+            Commands.Add(new RegisteredCommand(command, "", cb, aliases));
         }
 
         public void UnregisterCommand(string command)
@@ -307,7 +325,7 @@ namespace Cove.Server
 
         public void SetCommandDescription(string command, string description)
         {
-            var cmd = Commands.Find(c => c.Command == command);
+            var cmd = FindCommand(command);
             if (cmd == null)
             {
                 Log($"Command '{command}' not found!");
@@ -318,7 +336,7 @@ namespace Cove.Server
 
         public void InvokeCommand(WFPlayer player, string command, string[] args)
         {
-            var cmd = Commands.Find(c => c.Command == command);
+            var cmd = FindCommand(command);
             if (cmd == null)
             {
                 Log($"Command '{command}' not found!");
@@ -327,6 +345,10 @@ namespace Cove.Server
             cmd.Invoke(player, args);
         }
 
+        ///
+        /// <param name="command">The command name</param>
+        /// <returns>Whether the command exists</returns>
+        [Obsolete]
         public bool DoseCommandExist(string command)
         {
             var cmd = Commands.Find(c => c.Command == command);
@@ -334,6 +356,11 @@ namespace Cove.Server
                 return false;
 
             return true;
+        }
+
+        public RegisteredCommand? FindCommand(string name)
+        {
+            return Commands.Find(c => c.Command == name || c.Aliases.Contains(name));
         }
     }
 }
