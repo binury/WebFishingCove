@@ -35,7 +35,7 @@ namespace Cove.Server
     {
         List<RegisteredCommand> Commands = [];
 
-        void RegisterDefaultCommands()
+        public void RegisterDefaultCommands()
         {
             RegisterCommand(
                 "help",

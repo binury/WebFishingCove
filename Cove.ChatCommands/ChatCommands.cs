@@ -291,6 +291,8 @@ public class ChatCommands : CovePlugin
 
                 Server.loadedPlugins.Clear(); // clear the list
 
+                Server.RegisterDefaultCommands(); // re-register default commands
+
                 Server.loadAllPlugins(true); // reload all plugins
 
                 SendPlayerChatMessage(player, "Plugins have been reloaded!");
