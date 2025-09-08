@@ -57,9 +57,15 @@ namespace Cove.Server
 
         public bool isPlayerBanned(CSteamID id)
         {
-            string fileDir = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
+            string bansFile = $"{AppDomain.CurrentDomain.BaseDirectory}bans.txt";
 
-            string[] fileContent = File.ReadAllLines(fileDir);
+            if (!File.Exists(bansFile))
+            {
+                File.Create(bansFile).Close();
+                return false; // no one is banned yet
+            }
+
+            string[] fileContent = File.ReadAllLines(bansFile);
             foreach (string line in fileContent)
             {
                 if (line.Contains(id.m_SteamID.ToString()))

@@ -474,7 +474,7 @@ namespace Cove.Server
                     }
 
                     // get the players WFPlayer object
-                    WFPlayer player = AllPlayers.Find(p =>
+                    WFPlayer? player = AllPlayers.Find(p =>
                         p.SteamId == param.m_identityRemote.GetSteamID()
                     );
                     if (player == null)
