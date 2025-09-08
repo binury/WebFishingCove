@@ -261,14 +261,13 @@ namespace Cove.Server
                         if (prevPlayer.State == PlayerState.InGame)
                             continue;
 
-                        // we dont want to show players that left more than 10 minutes ago
                         if (
                             (
                                 DateTime.UtcNow
                                 - DateTimeOffset
                                     .FromUnixTimeSeconds(prevPlayer.leftTimestamp)
                                     .UtcDateTime
-                            ).TotalMinutes > 10
+                            ).TotalMinutes > 29
                         )
                         {
                             continue;
