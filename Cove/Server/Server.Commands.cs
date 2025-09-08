@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 using Cove.Server.Actor;
+using Cove.Server.Utils;
 using Steamworks;
 
 namespace Cove.Server
@@ -42,10 +39,10 @@ namespace Cove.Server
                 (player, args) =>
                 {
                     var sb = new StringBuilder();
-                    sb.AppendLine("Commands:");
+                    sb.AppendLineLF("Commands:");
                     foreach (var cmd in Commands)
                     {
-                        sb.AppendLine($"{cmd.Command} - {cmd.Description}");
+                        sb.AppendLineLF($"{cmd.Command} - {cmd.Description}");
                     }
                     messagePlayer(sb.ToString(), player.SteamId);
                 }
@@ -258,7 +255,7 @@ namespace Cove.Server
                     if (!isPlayerAdmin(player.SteamId))
                         return;
                     var sb = new StringBuilder();
-                    sb.AppendLine("Previous Players:");
+                    sb.AppendLineLF("Previous Players:");
                     foreach (var prevPlayer in PreviousPlayers)
                     {
                         if (prevPlayer.State == PlayerState.InGame)
