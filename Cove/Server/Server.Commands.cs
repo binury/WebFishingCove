@@ -75,33 +75,62 @@ namespace Cove.Server
                 {
                     if (!isPlayerAdmin(player.SteamId))
                         return;
+                    WFPlayer? playerToKick = null;
                     string playerIdent = string.Join(" ", args);
-                    // try find a user with the username first
-                    WFPlayer kickedplayer = AllPlayers
+
+                    var targetIsSteamID = System.Text.RegularExpressions.Regex.IsMatch(
+                        playerIdent,
+                        @"^7656119\d{10}$"
+                    );
+                    // find player by username
+                    var playerMatchingUsername = AllPlayers
                         .ToList()
                         .Find(p =>
                             p.Username.Equals(playerIdent, StringComparison.OrdinalIgnoreCase)
                         );
-                    // if there is no player with the username try find someone with that fisher ID
-                    if (kickedplayer == null)
-                        kickedplayer = AllPlayers
-                            .ToList()
-                            .Find(p =>
-                                p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase)
-                            );
-                    if (kickedplayer == null)
+                    // find player by fisher ID shortcode
+                    var targetIsFID = AllPlayers
+                        .ToList()
+                        .Find(p =>
+                            p.FisherID.Equals(playerIdent, StringComparison.OrdinalIgnoreCase)
+                        );
+
+                    if (targetIsSteamID)
                     {
-                        messagePlayer("That's not a player!", player.SteamId);
+                        CSteamID steamId = new CSteamID(Convert.ToUInt64(playerIdent));
+                        var username = Steamworks.SteamFriends.GetFriendPersonaName(steamId);
+                        playerToKick = new WFPlayer(
+                            id: steamId,
+                            fisherName: username,
+                            identity: new SteamNetworkingIdentity()
+                        )
+                        {
+                            Username = username == string.Empty ? playerIdent : username,
+                        };
+                    }
+                    else if (playerMatchingUsername != null)
+                    {
+                        playerToKick = playerMatchingUsername;
+                    }
+                    else if (targetIsFID != null)
+                    {
+                        playerToKick = targetIsFID;
+                    }
+
+                    if (playerToKick == null)
+                    {
+                        messagePlayer(
+                            $"${playerIdent} is not a known player or ID",
+                            player.SteamId
+                        );
                     }
                     else
                     {
-                        messagePlayer($"Kicked {kickedplayer.Username}", player.SteamId);
-                        kickPlayer(kickedplayer.SteamId);
-                        //SendGlobalChatMessage($"{kickedplayer.Username} was kicked from the lobby!");
+                        kickPlayer(playerToKick.SteamId);
                     }
                 }
             );
-            SetCommandDescription("kick", "Kicks a player from the server");
+            SetCommandDescription("kick", "!kick (username|steamID|fisherID)");
 
             RegisterCommand(
                 "ban",
